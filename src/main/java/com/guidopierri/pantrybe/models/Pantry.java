@@ -26,7 +26,7 @@ public class Pantry {
     @Setter
     @OneToOne
     @JsonIgnore
-    @JoinColumn(name = "user")
+    @JoinColumn(name = "user_id")
     private User user;
 
     public void addItem(Item item) {

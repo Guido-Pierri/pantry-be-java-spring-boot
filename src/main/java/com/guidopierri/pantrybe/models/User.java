@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "user")
+@Table(name = "_user")
 public class User {
     /*@OneToMany(fetch= FetchType.LAZY, mappedBy = "user")
     private List<CustomItem> customItemIds;*/
