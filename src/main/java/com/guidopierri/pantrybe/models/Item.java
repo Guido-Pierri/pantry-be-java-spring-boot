@@ -2,43 +2,95 @@ package com.guidopierri.pantrybe.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 @Entity
 @Table(name = "item")
-@ToString(exclude = "pantry")
 public class Item {
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Setter
-    @Getter
     private String name;
-    @Setter
-    @Getter
     private long quantity;
-    @Getter
-    @Setter
     private String expirationDate;
-    @Setter
-    @Getter
     private long gtin;
-    @Setter
-    @Getter
     private String brand;
-    @Setter
-    @Getter
     private String image;
-    @Setter
-    @Getter
     private String category;
     @ManyToOne()
     @JsonIgnore
     @JoinColumn(name = "pantry")
-    @Getter
-    @Setter
     private Pantry pantry;
+
+    public String toString() {
+        return "Item(id=" + this.id + ", name=" + this.name + ", quantity=" + this.quantity + ", expirationDate=" + this.expirationDate + ", gtin=" + this.gtin + ", brand=" + this.brand + ", image=" + this.image + ", category=" + this.category + ")";
+    }
+
+    public long getId() {
+        return this.id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public long getQuantity() {
+        return this.quantity;
+    }
+
+    public String getExpirationDate() {
+        return this.expirationDate;
+    }
+
+    public long getGtin() {
+        return this.gtin;
+    }
+
+    public String getBrand() {
+        return this.brand;
+    }
+
+    public String getImage() {
+        return this.image;
+    }
+
+    public String getCategory() {
+        return this.category;
+    }
+
+    public Pantry getPantry() {
+        return this.pantry;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setQuantity(long quantity) {
+        this.quantity = quantity;
+    }
+
+    public void setExpirationDate(String expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public void setGtin(long gtin) {
+        this.gtin = gtin;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    @JsonIgnore
+    public void setPantry(Pantry pantry) {
+        this.pantry = pantry;
+    }
 }
