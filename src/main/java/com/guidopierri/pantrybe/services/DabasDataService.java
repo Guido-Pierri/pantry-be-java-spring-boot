@@ -6,6 +6,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.guidopierri.pantrybe.models.Item;
 import com.guidopierri.pantrybe.models.dabas.article.Article;
 import com.guidopierri.pantrybe.models.dabas.search.Search;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -13,10 +17,14 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class DabasDataService implements DataProvider {
+    private Pageable createPageRequestUsing(int page, int size) {
+        return PageRequest.of(page, size);
+    }
     @Override
     public Article getArticle(String gtin) {
         Item item = new Item();
@@ -38,7 +46,7 @@ public class DabasDataService implements DataProvider {
     }
 
     @Override
-    public List<Search> search(String searchParameter) {
+    public List<Search> fetchUpaginatedSearch(String searchParameter) {
         List<Search> searchList = new ArrayList<>();
         String url = "https://api.dabas.com/DABASService/V2/articles/searchparameter/"+ searchParameter + "/JSON?apikey=741ffd2b-3be4-49b8-b837-45be48c7e7be";
         String jsonString;
@@ -55,9 +63,8 @@ public class DabasDataService implements DataProvider {
         }
         System.out.println("jsonString:" + jsonString);
         try {
-            Search[] data = getObjectMapper().readValue( jsonString, Search[].class);
+            return Arrays.stream(getObjectMapper().readValue( jsonString, Search[].class)).toList();
 
-            return List.of(data);
         }catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -86,5 +93,17 @@ public class DabasDataService implements DataProvider {
         }
         return response.body();
     }
+@Override
+    public Page<Search> searchToPageable(String searchParameter, int page, int size) {
+    Pageable pageRequest = createPageRequestUsing(page, size);
 
+    List<Search> searchList = fetchUpaginatedSearch(searchParameter);
+    int start = (int) pageRequest.getOffset();
+    int end = Math.min((start + pageRequest.getPageSize()), searchList.size());
+
+    List<Search> pageContent = searchList.subList(start, end);
+
+    return new PageImpl<>(pageContent, pageRequest, searchList.size());
+
+}
 }
