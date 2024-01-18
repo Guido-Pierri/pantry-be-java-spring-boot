@@ -13,8 +13,9 @@ public class Pantry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany(mappedBy = "pantry")
+    @OneToMany(mappedBy = "pantry", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Item> items;
+
     @OneToOne
     @JsonIgnore
     @JoinColumn(name = "user_id")
@@ -30,6 +31,14 @@ public class Pantry {
 
     public void setItems(List<Item> items) {
         this.items = items;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public void setUser(User user) {

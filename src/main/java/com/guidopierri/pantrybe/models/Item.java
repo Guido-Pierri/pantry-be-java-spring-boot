@@ -17,7 +17,6 @@ public class Item {
     private String image;
     private String category;
     @ManyToOne()
-    @JsonIgnore
     @JoinColumn(name = "pantry")
     private Pantry pantry;
 
