@@ -33,6 +33,12 @@ public class Article{
     public String mangdFardigVara_Formatted;
     @JsonProperty("MangdFardigVaraEnhet") 
     public String mangdFardigVaraEnhet;
+    @JsonProperty("MangdFardigVaraEnhetKod")
+    public String mangdFardigVaraEnhetKod;
+    @JsonProperty("MangdFardigVaraAvserKod")
+    public String mangdFardigVaraAvserKod;
+    @JsonProperty("Bruttovikt_Formatted")
+    public String bruttovikt_Formatted;
     @JsonProperty("MangdPris") 
     public int mangdPris;
     @JsonProperty("MangdFardigVaraAvser") 
