@@ -57,8 +57,11 @@ public class PantryService {
         Pantry savedPantry = pantryRepository.save(pantry);
     }
 
-    public Pantry getPantriesByUser(long id) {
+    public Pantry getPantriesByUserId(long id) {
         User user = userService.getUserById(id);
-        return pantryRepository.findById(user.getPantry().getId()).orElse(null);
+        System.out.println("user" + user);
+        long pantryId = user.getPantry().getId();
+        System.out.println("pantryId" + pantryId);
+        return pantryRepository.findById(pantryId).orElse(null);
     }
 }
