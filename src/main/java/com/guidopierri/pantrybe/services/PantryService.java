@@ -1,6 +1,7 @@
 package com.guidopierri.pantrybe.services;
 
 import com.guidopierri.pantrybe.config.EntityMapper;
+import com.guidopierri.pantrybe.dtos.ItemDto;
 import com.guidopierri.pantrybe.dtos.PantryDto;
 import com.guidopierri.pantrybe.dtos.requests.CreatePantryRequest;
 import com.guidopierri.pantrybe.models.Item;
@@ -10,6 +11,7 @@ import com.guidopierri.pantrybe.repositories.PantryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PantryService {
@@ -64,4 +66,21 @@ public class PantryService {
         System.out.println("pantryId" + pantryId);
         return pantryRepository.findById(pantryId).orElse(null);
     }
+    public List<ItemDto> convertItemsToDto(List<Item> items) {
+        return items.stream()
+                .map(item -> {
+                    ItemDto itemDto = new ItemDto();
+                    itemDto.setId(item.getId());
+                    itemDto.setName(item.getName());
+                    itemDto.setQuantity(item.getQuantity());
+                    itemDto.setExpirationDate(item.getExpirationDate());
+                    itemDto.setGtin(String.valueOf(item.getGtin()));
+                    itemDto.setBrand(item.getBrand());
+                    itemDto.setImage(item.getImage());
+                    itemDto.setCategory(item.getCategory());
+                    return itemDto;
+                })
+                .collect(Collectors.toList());
+    }
+
 }

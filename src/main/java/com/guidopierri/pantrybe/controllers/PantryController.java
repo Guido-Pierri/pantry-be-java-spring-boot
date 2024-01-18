@@ -41,27 +41,12 @@ public class PantryController {
         Pantry pantry = pantryService.getPantriesByUserId(id);
         PantryDto dto = new PantryDto();
         dto.setId(pantry.getId());
-        dto.setItems(convertItemsToDto(pantry.getItems()));
+        dto.setItems(pantryService.convertItemsToDto(pantry.getItems()));
         dto.setUserId(pantry.getUser().getId());
         return dto;
     }
 
-        private List<ItemDto> convertItemsToDto(List<Item> items) {
-            return items.stream()
-                    .map(item -> {
-                        ItemDto itemDto = new ItemDto();
-                        itemDto.setId(item.getId());
-                        itemDto.setName(item.getName());
-                        itemDto.setQuantity(item.getQuantity());
-                        itemDto.setExpirationDate(item.getExpirationDate());
-                        itemDto.setGtin(String.valueOf(item.getGtin()));
-                        itemDto.setBrand(item.getBrand());
-                        itemDto.setImage(item.getImage());
-                        itemDto.setCategory(item.getCategory());
-                        return itemDto;
-                    })
-                    .collect(Collectors.toList());
-        }
+
 
     @PostMapping("/create-pantry")
     public PantryDto createPantry(@RequestBody CreatePantryRequest pantry) {
