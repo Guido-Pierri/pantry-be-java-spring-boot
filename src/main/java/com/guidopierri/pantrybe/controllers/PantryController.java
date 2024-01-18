@@ -6,15 +6,10 @@ import com.guidopierri.pantrybe.dtos.PantryDto;
 import com.guidopierri.pantrybe.dtos.requests.CreateItemRequest;
 import com.guidopierri.pantrybe.dtos.requests.CreatePantryRequest;
 import com.guidopierri.pantrybe.models.Pantry;
-import com.guidopierri.pantrybe.models.Item;
-
 import com.guidopierri.pantrybe.services.ItemService;
 import com.guidopierri.pantrybe.services.PantryService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*")

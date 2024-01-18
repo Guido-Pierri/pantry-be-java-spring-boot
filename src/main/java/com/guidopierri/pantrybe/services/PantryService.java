@@ -39,9 +39,8 @@ public class PantryService {
             Pantry savedPantry = pantryRepository.save(pantry);
 
             // Map the saved pantry entity to a DTO
-            PantryDto dto = entityMapper.pantryToPantryDto(savedPantry);
 
-            return dto;
+            return entityMapper.pantryToPantryDto(savedPantry);
         }
 
         return null;
@@ -53,6 +52,7 @@ public class PantryService {
     }
 
     public void addItemToPantry(long pantryId, Item item) {
+        //FIXME:
         Pantry pantry = getPantryById(pantryId);
         pantry.addItem(item);
         System.out.println("pantry" + pantry);
