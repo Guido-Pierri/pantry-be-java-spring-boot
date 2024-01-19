@@ -28,11 +28,11 @@ public class PantryService {
     }
 
     public PantryDto createPantry(CreatePantryRequest request) {
-        if (request.getId() == 0) {
+        if (request.id() == 0) {
             Pantry pantry = new Pantry();
 
             // Fetch the user based on the user ID in the request
-            User user = userService.getUserById(request.getUserId());
+            User user = userService.getUserById(request.userId());
             pantry.setUser(user);
 
             // Save the pantry and get the saved entity
