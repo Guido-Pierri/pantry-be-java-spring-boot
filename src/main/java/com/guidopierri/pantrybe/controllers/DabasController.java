@@ -25,8 +25,11 @@ public class DabasController {
     @GetMapping("/product/{gtin}")
     public ResponseEntity<ItemResponse> fetchProductByGtin(@PathVariable String gtin) {
         Article article = dabasDataService.getArticle(gtin);
+        if (article == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         ItemResponse item = new ItemResponse();
-        item.name = article.artikelbenamning;
+        item.name = article.produktnamn;
         item.brand = article.varumarke.varumarke;
         item.category = article.artikelkategori;
         //item.expiryDate = article.hyllkantstext;
