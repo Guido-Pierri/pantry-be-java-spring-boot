@@ -1,5 +1,6 @@
 package com.guidopierri.pantrybe.controllers;
 
+import com.guidopierri.pantrybe.dtos.ItemDto;
 import com.guidopierri.pantrybe.models.Item;
 import com.guidopierri.pantrybe.services.ItemService;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,7 +18,7 @@ public class ItemController {
         this.itemService = itemService;
     }
     @GetMapping("")
-    public List<Item> getItems() {
+    public List<ItemDto> getItems() {
 
         return itemService.getItems();
     }

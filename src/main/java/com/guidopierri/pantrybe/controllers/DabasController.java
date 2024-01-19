@@ -28,14 +28,7 @@ public class DabasController {
         if (article == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        ItemResponse item = new ItemResponse();
-        item.name = article.produktnamn;
-        item.brand = article.varumarke.varumarke;
-        item.category = article.artikelkategori;
-        //item.expiryDate = article.hyllkantstext;
-        //item.quantity = article.forpackningsstorlek;
-        item.image = article.bilder.get(1).lank;
-        item.gtin = article.gTIN;
+        ItemResponse item = new ItemResponse(article.produktnamn, article.gTIN, article.varumarke.varumarke, article.bilder.get(1).lank, article.artikelkategori);
         return new ResponseEntity<>(item, HttpStatus.OK);
     }
     @GetMapping("/parameter/{searchParameter}")

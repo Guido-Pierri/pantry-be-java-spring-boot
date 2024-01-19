@@ -227,7 +227,7 @@ public class Article{
     public Object t4245_PresentationsformKod;
     @JsonProperty("T4246_BeredningsformKod") 
     public Object t4246_BeredningsformKod;
-    @JsonProperty("T3816_DimensionTypeCode") 
+    @JsonProperty("T3816_DimensionTypeCode")
     public Object t3816_DimensionTypeCode;
     @JsonProperty("Hyllbredd") 
     public Object hyllbredd;
@@ -537,4 +537,5 @@ public class Article{
     public Object påstående;
     @JsonProperty("Modules") 
     public ArrayList<Module> modules;
+
 }

@@ -31,15 +31,15 @@ public class UserService {
         return (userRepository.findById(id).orElse(null));
     }
     public UserDto createUser(CreateUserRequest user) {
-        Optional<User> userFromDatabase = userRepository.findUserByEmail(user.getEmail());
+        Optional<User> userFromDatabase = userRepository.findUserByEmail(user.email());
         if (userFromDatabase.isEmpty()){
 
-        if (user.id == 0) {
+        if (user.id() == 0) {
             User newUser = new User();
-            newUser.setFirstName((user.getFirstName()));
-            newUser.setLastName(user.getLastName());
-            newUser.setEmail(user.getEmail());
-            newUser.setPassword(user.getPassword());
+            newUser.setFirstName((user.firstName()));
+            newUser.setLastName(user.lastName());
+            newUser.setEmail(user.email());
+            newUser.setPassword(user.password());
             userRepository.save(newUser);
             return entityMapper.userToUserDto(newUser);
         }
@@ -48,11 +48,12 @@ public class UserService {
     }
     public List<Pantry> convertToPantry(List<PantryDto> dtoList) {
         List<Pantry> pantryList = new ArrayList<>();
-        Pantry pantry = new Pantry();
 
         for (PantryDto dto : dtoList) {
-            pantry.setId(dto.getId());
-            pantry.setUser(userRepository.findById(dto.getUserId()).orElse(null));
+
+            Pantry pantry = new Pantry();
+            pantry.setId(dto.id());
+            pantry.setUser(userRepository.findById(dto.userId()).orElse(null));
             pantryList.add(pantry);
         }
         return pantryList;
