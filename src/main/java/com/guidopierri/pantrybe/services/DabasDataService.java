@@ -35,6 +35,10 @@ public class DabasDataService implements DataProvider {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        if (jsonString.contains("Not Found")) {
+            System.out.println("404 Error: Resource not found for search parameter: " + gtin);
+            return null; // or handle it in another way based on your requirements
+        }
         try {
             Article data = getObjectMapper().readValue( jsonString, Article.class);
 
