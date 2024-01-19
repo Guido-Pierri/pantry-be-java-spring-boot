@@ -16,7 +16,35 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EntityMapper {
-ItemDto itemToItemDto(Item item);
+default ItemDto itemToItemDto(Item item){
+        if ( item == null ) {
+            return null;
+        }
+
+        long id = 0L;
+        String name = null;
+        long quantity = 0L;
+        String expirationDate = null;
+        String gtin = null;
+        String brand = null;
+        String image = null;
+        String category = null;
+
+        id = item.getId();
+        name = item.getName();
+        quantity = item.getQuantity();
+        expirationDate = item.getExpirationDate();
+        gtin = String.valueOf( item.getGtin() );
+        brand = item.getBrand();
+        image = item.getImage();
+        category = item.getCategory();
+
+        long pantryId = 0L;
+        pantryId = item.getPantry().getId();
+
+    return new ItemDto( id, name, quantity, expirationDate, gtin, brand, image, category, pantryId );
+
+};
 Item itemDtoToItem(ItemDto itemDto);
 ItemDto itemRequestToItemDto(CreateItemRequest itemRequest);
 PantryDto pantryToPantryDto(Pantry pantry);

@@ -69,16 +69,15 @@ public class PantryService {
     public List<ItemDto> convertItemsToDto(List<Item> items) {
         return items.stream()
                 .map(item -> {
-                    ItemDto itemDto = new ItemDto();
-                    itemDto.setId(item.getId());
-                    itemDto.setName(item.getName());
-                    itemDto.setQuantity(item.getQuantity());
-                    itemDto.setExpirationDate(item.getExpirationDate());
-                    itemDto.setGtin(String.valueOf(item.getGtin()));
-                    itemDto.setBrand(item.getBrand());
-                    itemDto.setImage(item.getImage());
-                    itemDto.setCategory(item.getCategory());
-                    return itemDto;
+                    return new ItemDto(item.getId(),
+                            item.getName(),
+                            item.getQuantity(),
+                            item.getExpirationDate(),
+                            String.valueOf(item.getGtin()),
+                            item.getBrand(),
+                            item.getImage(),
+                            item.getCategory(),
+                            item.getPantry().getId());
                 })
                 .collect(Collectors.toList());
     }

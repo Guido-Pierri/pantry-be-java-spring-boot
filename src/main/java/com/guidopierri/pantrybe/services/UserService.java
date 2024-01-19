@@ -48,11 +48,12 @@ public class UserService {
     }
     public List<Pantry> convertToPantry(List<PantryDto> dtoList) {
         List<Pantry> pantryList = new ArrayList<>();
-        Pantry pantry = new Pantry();
 
         for (PantryDto dto : dtoList) {
-            pantry.setId(dto.getId());
-            pantry.setUser(userRepository.findById(dto.getUserId()).orElse(null));
+
+            Pantry pantry = new Pantry();
+            pantry.setId(dto.id());
+            pantry.setUser(userRepository.findById(dto.userId()).orElse(null));
             pantryList.add(pantry);
         }
         return pantryList;

@@ -6,6 +6,7 @@ import com.guidopierri.pantrybe.dtos.PantryDto;
 import com.guidopierri.pantrybe.dtos.requests.CreateItemRequest;
 import com.guidopierri.pantrybe.dtos.requests.CreatePantryRequest;
 import com.guidopierri.pantrybe.models.Pantry;
+import com.guidopierri.pantrybe.repositories.ItemRepository;
 import com.guidopierri.pantrybe.services.ItemService;
 import com.guidopierri.pantrybe.services.PantryService;
 import org.springframework.web.bind.annotation.*;
@@ -34,11 +35,8 @@ public class PantryController {
     @GetMapping("/user/{id}")
     public PantryDto getPantriesByUser(@PathVariable long id) {
         Pantry pantry = pantryService.getPantriesByUserId(id);
-        PantryDto dto = new PantryDto();
-        dto.setId(pantry.getId());
-        dto.setItems(pantryService.convertItemsToDto(pantry.getItems()));
-        dto.setUserId(pantry.getUser().getId());
-        return dto;
+
+        return new PantryDto(pantry.getId(), pantry.getUser().getId(),pantryService.convertItemsToDto(pantry.getItems()) );
     }
 
 
@@ -46,6 +44,10 @@ public class PantryController {
     @PostMapping("/create-pantry")
     public PantryDto createPantry(@RequestBody CreatePantryRequest pantry) {
         return pantryService.createPantry(pantry);
+    }
+    @GetMapping("/item")
+    public List<ItemDto> getItems() {
+        return itemService.getItems();
     }
     @GetMapping("/item/{id}")
     public ItemDto getItem(@PathVariable long id) {
