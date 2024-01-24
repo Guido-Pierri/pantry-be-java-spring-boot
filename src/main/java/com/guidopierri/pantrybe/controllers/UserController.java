@@ -3,10 +3,13 @@ package com.guidopierri.pantrybe.controllers;
 import com.guidopierri.pantrybe.dtos.UserDto;
 import com.guidopierri.pantrybe.dtos.responses.UserResponse;
 import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
+import com.guidopierri.pantrybe.models.User;
 import com.guidopierri.pantrybe.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -22,7 +25,11 @@ public class UserController {
 
         return userService.getUserByEmail(email);
     }
-
+    @GetMapping("all-users")
+    public List<User> getAllUsers() {
+        System.out.println("getting all users");
+        return userService.getAllUsers();
+    }
     @PostMapping("/create")
     public ResponseEntity<UserDto> createUser(@RequestBody CreateUserRequest user) {
 
