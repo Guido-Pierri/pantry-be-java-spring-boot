@@ -17,9 +17,8 @@ public class Pantry {
     private List<Item> items;
 
     @OneToOne
-    @JsonIgnore
     @JoinColumn(name = "user_id")
-    private User user;
+    private User application_user;
 
     public long getId() {
         return id;
@@ -37,12 +36,12 @@ public class Pantry {
         return items;
     }
 
-    public User getUser() {
-        return user;
+    public User getApplication_user() {
+        return application_user;
     }
 
     public void setUser(User user) {
-        this.user = user;
+        this.application_user = user;
     }
 
     public void addItem(Item item) {
@@ -51,6 +50,6 @@ public class Pantry {
 
 
     public String toString() {
-        return "Pantry(id=" + this.getId() + ", user=" + this.user + ")";
+        return "Pantry(id=" + this.getId() + ", user=" + this.application_user + ")";
     }
 }
