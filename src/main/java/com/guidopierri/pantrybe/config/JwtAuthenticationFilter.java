@@ -72,6 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } else if (username == null) {
             logger.info("No username claim in token !!");
             // Handle case where there is no username claim in the token
+
         }
 
         filterChain.doFilter(request, response);
