@@ -1,5 +1,6 @@
 package com.guidopierri.pantrybe.config;
 
+import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.models.Item;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.models.User;
@@ -51,4 +52,5 @@ PantryDto pantryToPantryDto(Pantry pantry);
 UserDto userToUserDto(User user);
 UserResponse userToUserResponse(User user);
 Pantry pantryRequestToPantry(CreatePantryRequest request);
+User createUserRequestToUser(CreateUserRequest userDto);
 }

@@ -20,8 +20,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+    }
+  /*  private Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
 
     @Autowired
     private JwtHelper jwtHelper;
@@ -76,5 +81,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
+    }*/
 }

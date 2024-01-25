@@ -10,4 +10,5 @@ public record CreateUserRequest(@NotNull long id,
                                 @Email @NotNull String email,
                                 @NotNull String password) {
 
+
 }

@@ -8,22 +8,30 @@ import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.models.User;
 import com.guidopierri.pantrybe.repositories.UserRepository;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final EntityMapper entityMapper;
     UserService(UserRepository userRepository, EntityMapper entityMapper) {
         this.userRepository = userRepository;
         this.entityMapper = entityMapper;
     }
+    private Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
     public List<User> getUsers() {
         return userRepository.findAll();
     }
@@ -31,6 +39,7 @@ public class UserService {
         return (userRepository.findById(id).orElse(null));
     }
     public UserDto createUser(CreateUserRequest user) {
+        logger.info("User: {}", user);
         Optional<User> userFromDatabase = userRepository.findUserByEmail(user.email());
         if (userFromDatabase.isEmpty()){
 
@@ -70,4 +79,8 @@ public class UserService {
     }
 
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return null;
+    }
 }
