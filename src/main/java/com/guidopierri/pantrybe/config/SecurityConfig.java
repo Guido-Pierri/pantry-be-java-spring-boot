@@ -29,13 +29,8 @@ public class SecurityConfig  {
 
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
     private String jwkSetUri;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     //private UserDetailsService userDetailsService;
-    @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        //this.userDetailsService = userDetailsService;
-    }
+
 
     /*@Autowired
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -48,7 +43,7 @@ public class SecurityConfig  {
                 //.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/users/create","/register-test").permitAll()
+                        .requestMatchers("/api/v1/users/create","/api/v1/pantry/create-pantry","/register-test","/swagger-ui/**","/v3/**").permitAll()
                         //.requestMatchers("/admin").hasRole(Roles.ADMIN.toString())
                         .anyRequest().authenticated()
                 )

@@ -6,6 +6,7 @@ import com.guidopierri.pantrybe.dtos.requests.CreateItemRequest;
 import com.guidopierri.pantrybe.models.Item;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.repositories.ItemRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final com.guidopierri.pantrybe.services.PantryService pantryService;
     private final EntityMapper entityMapper;
+    @Autowired
     ItemService(ItemRepository itemRepository, PantryService pantryService , EntityMapper entityMapper ) {
         this.itemRepository = itemRepository;
         this.pantryService = pantryService;

@@ -4,6 +4,8 @@ import com.guidopierri.pantrybe.dtos.UserDto;
 import com.guidopierri.pantrybe.dtos.responses.UserResponse;
 import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.services.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,9 +22,11 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
+    Logger logger = LoggerFactory.getLogger(UserController.class);
     @GetMapping("email/{email}")
     public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
-
+    logger.info("Received request to get user by email: {}", email);
         return userService.getUserByEmail(email);
     }
 

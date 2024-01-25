@@ -11,6 +11,7 @@ import com.guidopierri.pantrybe.repositories.UserRepository;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +28,7 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final EntityMapper entityMapper;
+    @Autowired
     UserService(UserRepository userRepository, EntityMapper entityMapper) {
         this.userRepository = userRepository;
         this.entityMapper = entityMapper;
@@ -69,8 +71,11 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<UserResponse> getUserByEmail(String email) {
+        logger.info("Received request to get user by email: {}", email);
         Optional<User> user = userRepository.findUserByEmail(email);
+        logger.info("User: {}", user);
         if (user.isEmpty()) {
+            logger.warn("User with email: {} not found", email);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(entityMapper.userToUserResponse(user.orElse(null)), HttpStatus.OK);
