@@ -36,7 +36,7 @@ public class PantryController {
     public PantryDto getPantriesByUser(@PathVariable long id) {
         Pantry pantry = pantryService.getPantriesByUserId(id);
 
-        return new PantryDto(pantry.getId(), pantry.getUser().getId(),pantryService.convertItemsToDto(pantry.getItems()) );
+        return new PantryDto(pantry.getId(), pantry.getApplication_user().getId(),pantryService.convertItemsToDto(pantry.getItems()) );
     }
 
 
