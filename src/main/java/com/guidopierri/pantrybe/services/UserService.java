@@ -27,9 +27,11 @@ public class UserService {
     public List<User> getUsers() {
         return userRepository.findAll();
     }
+
     public User getUserById(long id) {
         return (userRepository.findById(id).orElse(null));
     }
+
     public UserDto createUser(CreateUserRequest user) {
         Optional<User> userFromDatabase = userRepository.findUserByEmail(user.email());
         if (userFromDatabase.isEmpty()){
