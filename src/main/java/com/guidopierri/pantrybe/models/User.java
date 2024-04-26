@@ -1,96 +1,98 @@
 package com.guidopierri.pantrybe.models;
 
+import com.guidopierri.pantrybe.permissions.Roles;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
 
 @Entity
-@Table(name = "_user")
-public class User {
-    /*@OneToMany(fetch= FetchType.LAZY, mappedBy = "user")
-    private List<CustomItem> customItemIds;*/
-    /*@OneToMany(fetch= FetchType.LAZY, mappedBy = "user")
-    private List<Recipe> recipes;*/
+@Table(name = "application_user")
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
+    @Size(min = 4, max = 64)
+
+    private String username;
+    private String email;
+    @Size(min = 4, max = 64)
+    private String password;
     private String firstName;
     private String lastName;
-    private String email;
-    private String password;
+    private boolean isAccountNonExpired;
+    private boolean isAccountNonLocked;
+    private boolean isCredentialsNonExpired;
+    private boolean isEnabled;
+
+    @Enumerated(EnumType.STRING)
+    private Roles roles;
+
     @OneToOne(mappedBy = "user")
     private Pantry pantry;
-
-    public User(Long id, String firstName, String lastName, String email, String password, Pantry pantry) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.pantry = pantry;
-    }
 
     public User() {
     }
 
-    public static UserBuilder builder() {
-        return new UserBuilder();
+    public User(String username, String email, String password, String firstName, String lastName, boolean isAccountNonExpired, boolean isAccountNonLocked, boolean isCredentialsNonExpired, boolean isEnabled, Roles roles, Pantry pantry) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.isAccountNonExpired = isAccountNonExpired;
+        this.isAccountNonLocked = isAccountNonLocked;
+        this.isCredentialsNonExpired = isCredentialsNonExpired;
+        this.isEnabled = isEnabled;
+        this.roles = roles;
+        this.pantry = pantry;
     }
-    //should be a list of items? this is a problem when I will want to show all the items of a user in the front end
-    //I will have to make a request for each item
-    //maybe I can make a request for all the items of a user and then filter them in the front end
-    //or I can make a request for all the items of a user and then make a request for each item
-    /*@OneToMany(fetch= FetchType.LAZY, mappedBy = "user")
-    private List<Item> itemIds;*/
-
-    //public void setItemIds(List<Item> itemIds) {
-    //this.itemIds = itemIds;
-    //}
-
-    /*public List<CustomItem> getCustomItemIds() {
-        return customItemIds;
-    }*/
 
     @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-
-                '}';
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.getGrantedAuthorities();
     }
-
-    public Long getId() {
-        return this.id;
+    public long getId() {
+        return id;
     }
-
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    public String getLastName() {
-        return this.lastName;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
+    @Override
     public String getPassword() {
-        return this.password;
+        return password;
     }
 
-    public Pantry getPantry() {
-        return this.pantry;
+    @Override
+    public String getUsername() {
+        return username;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    @Override
+    public boolean isAccountNonExpired() {
+        return isAccountNonExpired;
     }
 
-    public void setPantry(Pantry pantry) {
-        this.pantry = pantry;
+    @Override
+    public boolean isAccountNonLocked() {
+        return isAccountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return isCredentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setFirstName(String firstName) {
@@ -101,61 +103,56 @@ public class User {
         this.lastName = lastName;
     }
 
+    public void setAccountNonExpired(boolean accountNonExpired) {
+        isAccountNonExpired = accountNonExpired;
+    }
+
+    public void setAccountNonLocked(boolean accountNonLocked) {
+        isAccountNonLocked = accountNonLocked;
+    }
+
+    public void setCredentialsNonExpired(boolean credentialsNonExpired) {
+        isCredentialsNonExpired = credentialsNonExpired;
+    }
     public void setEmail(String email) {
         this.email = email;
     }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public String getEmail(String email) {
+        return email;
+    }
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
     }
 
-    public static class UserBuilder {
-        private Long id;
-        private String firstName;
-        private String lastName;
-        private String email;
-        private String password;
-        private Pantry pantry;
+    public void setAuthority(Roles roles) {
+        this.roles = roles;
+    }
 
-        UserBuilder() {
-        }
+    public void setPantry(Pantry pantry) {
+        this.pantry = pantry;
+    }
 
-        public UserBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
+    public String getFirstName() {
+        return firstName;
+    }
 
-        public UserBuilder firstName(String firstName) {
-            this.firstName = firstName;
-            return this;
-        }
+    public String getLastName() {
+        return lastName;
+    }
 
-        public UserBuilder lastName(String lastName) {
-            this.lastName = lastName;
-            return this;
-        }
+    public Roles getRoles() {
+        return roles;
+    }
 
-        public UserBuilder email(String email) {
-            this.email = email;
-            return this;
-        }
+    public void setRoles(Roles roles) {
+        this.roles = roles;
+    }
 
-        public UserBuilder password(String password) {
-            this.password = password;
-            return this;
-        }
+    public Pantry getPantry() {
+        return pantry;
+    }
 
-        public UserBuilder pantry(Pantry pantry) {
-            this.pantry = pantry;
-            return this;
-        }
-
-        public User build() {
-            return new User(this.id, this.firstName, this.lastName, this.email, this.password, this.pantry);
-        }
-
-        public String toString() {
-            return "User.UserBuilder(id=" + this.id + ", firstName=" + this.firstName + ", lastName=" + this.lastName + ", email=" + this.email + ", password=" + this.password + ", pantry=" + this.pantry + ")";
-        }
+    public String getEmail() {
+        return email;
     }
 }

@@ -7,9 +7,13 @@ import com.guidopierri.pantrybe.dtos.responses.UserResponse;
 import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.models.User;
+import com.guidopierri.pantrybe.permissions.Roles;
 import com.guidopierri.pantrybe.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final EntityMapper entityMapper;
     UserService(UserRepository userRepository, EntityMapper entityMapper) {
@@ -27,26 +31,30 @@ public class UserService {
     public List<User> getUsers() {
         return userRepository.findAll();
     }
-
     public User getUserById(long id) {
         return (userRepository.findById(id).orElse(null));
     }
-
     public UserDto createUser(CreateUserRequest user) {
         Optional<User> userFromDatabase = userRepository.findUserByEmail(user.email());
         if (userFromDatabase.isEmpty()){
 
-        if (user.id() == 0) {
-            User newUser = new User();
-            newUser.setFirstName((user.firstName()));
-            newUser.setLastName(user.lastName());
-            newUser.setEmail(user.email());
-            newUser.setPassword(user.password());
-            userRepository.save(newUser);
-            return entityMapper.userToUserDto(newUser);
+            if (user.id() == 0) {
+                User newUser = new User();
+                newUser.setFirstName((user.firstName()));
+                newUser.setLastName(user.lastName());
+                newUser.setEmail(user.email());
+                newUser.setPassword(user.password());
+                newUser.setUsername(user.email());
+                newUser.setAccountNonExpired(true);
+                newUser.setAccountNonLocked(true);
+                newUser.setCredentialsNonExpired(true);
+                newUser.setEnabled(true);
+                newUser.setRoles(Roles.USER);
+                userRepository.save(newUser);
+                return entityMapper.userToUserDto(newUser);
+            }
         }
-        }
-    return null;
+        return null;
     }
     public List<Pantry> convertToPantry(List<PantryDto> dtoList) {
         List<Pantry> pantryList = new ArrayList<>();
@@ -72,4 +80,14 @@ public class UserService {
     }
 
 
+    public UserDto getUserByemailAndPassword(String email, String password) {
+        return entityMapper.userToUserDto(userRepository.findUserByEmailAndPassword(email,password).orElse(null));
+    }
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        // TODO - What if we do not FIND user?
+
+        return userRepository.findByUsername(username);
+    }
 }
