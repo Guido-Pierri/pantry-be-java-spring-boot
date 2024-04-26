@@ -18,9 +18,13 @@ public class Pantry {
 
     @OneToOne
     @JsonIgnore
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "application_user")
     private User user;
 
+    /*@OneToOne
+    @JsonIgnore
+    @JoinColumn(name = "application_user")
+    private User application_user;*/
     public long getId() {
         return id;
     }
@@ -49,8 +53,8 @@ public class Pantry {
         items.add(item);
     }
 
-
-    public String toString() {
-        return "Pantry(id=" + this.getId() + ", user=" + this.user + ")";
+    public Pantry() {
     }
+
+
 }
