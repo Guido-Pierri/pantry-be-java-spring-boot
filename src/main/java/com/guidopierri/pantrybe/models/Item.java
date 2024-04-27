@@ -5,14 +5,13 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "item")
-public class Item {
+public class Item implements GenericItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;
     private long quantity;
     private String expirationDate;
-    private long gtin;
     private String brand;
     private String image;
     private String category;
@@ -20,8 +19,21 @@ public class Item {
     @JoinColumn(name = "pantry")
     private Pantry pantry;
 
+    public Item() {
+    }
+
+    public Item(String name, long quantity, String expirationDate, long gtin, String brand, String image, String category, Pantry pantry) {
+        this.name = name;
+        this.quantity = quantity;
+        this.expirationDate = expirationDate;
+        this.brand = brand;
+        this.image = image;
+        this.category = category;
+        this.pantry = pantry;
+    }
+
     public String toString() {
-        return "Item(id=" + this.id + ", name=" + this.name + ", quantity=" + this.quantity + ", expirationDate=" + this.expirationDate + ", gtin=" + this.gtin + ", brand=" + this.brand + ", image=" + this.image + ", category=" + this.category + ")";
+        return "Item(id=" + this.id + ", name=" + this.name + ", quantity=" + this.quantity + ", expirationDate=" + this.expirationDate + ", brand=" + this.brand + ", image=" + this.image + ", category=" + this.category + ")";
     }
 
     public long getId() {
@@ -40,9 +52,6 @@ public class Item {
         return this.expirationDate;
     }
 
-    public long getGtin() {
-        return this.gtin;
-    }
 
     public String getBrand() {
         return this.brand;
@@ -72,9 +81,6 @@ public class Item {
         this.expirationDate = expirationDate;
     }
 
-    public void setGtin(long gtin) {
-        this.gtin = gtin;
-    }
 
     public void setBrand(String brand) {
         this.brand = brand;
