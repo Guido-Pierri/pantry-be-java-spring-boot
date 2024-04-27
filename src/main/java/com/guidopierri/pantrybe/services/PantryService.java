@@ -16,13 +16,15 @@ import java.util.stream.Collectors;
 @Service
 public class PantryService {
     private final PantryRepository pantryRepository;
-    private final com.guidopierri.pantrybe.services.UserService userService;
+    private final UserService userService;
     private final EntityMapper entityMapper;
+
     PantryService(PantryRepository pantryRepository, UserService userService, EntityMapper entityMapper) {
         this.pantryRepository = pantryRepository;
         this.userService = userService;
         this.entityMapper = entityMapper;
     }
+
     public List<Pantry> getAllPantries() {
         return pantryRepository.findAll();
     }
@@ -51,13 +53,6 @@ public class PantryService {
         return (pantryRepository.findById(pantryId).orElse(null));
     }
 
-    public void addItemToPantry(long pantryId, Item item) {
-        //FIXME:
-        Pantry pantry = getPantryById(pantryId);
-        pantry.addItem(item);
-        System.out.println("pantry" + pantry);
-        Pantry savedPantry = pantryRepository.save(pantry);
-    }
 
     public Pantry getPantriesByUserId(long id) {
         User user = userService.getUserById(id);
@@ -66,6 +61,7 @@ public class PantryService {
         System.out.println("pantryId" + pantryId);
         return pantryRepository.findById(pantryId).orElse(null);
     }
+
     public List<ItemDto> convertItemsToDto(List<Item> items) {
         return items.stream()
                 .map(item -> {
@@ -73,13 +69,20 @@ public class PantryService {
                             item.getName(),
                             item.getQuantity(),
                             item.getExpirationDate(),
-                            String.valueOf(item.getGtin()),
                             item.getBrand(),
                             item.getImage(),
                             item.getCategory(),
                             item.getPantry().getId());
                 })
                 .collect(Collectors.toList());
+    }
+
+    public void addItemToPantry(long pantryId, Item item) {
+        //FIXME:
+        Pantry pantry = getPantryById(pantryId);
+        pantry.addItem(item);
+        System.out.println("pantry" + pantry);
+        pantryRepository.save(pantry);
     }
 
 }
