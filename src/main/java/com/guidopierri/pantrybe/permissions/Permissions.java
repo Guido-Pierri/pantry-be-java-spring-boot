@@ -1,6 +1,5 @@
 package com.guidopierri.pantrybe.permissions;
 
-
 public enum Permissions {
     ADMIN_READ("admin:read"),
     ADMIN_WRITE("admin:write"),
