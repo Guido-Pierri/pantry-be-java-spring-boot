@@ -1,85 +1,68 @@
 package com.guidopierri.pantrybe.config;
 
-import com.guidopierri.pantrybe.permissions.Roles;
-import com.guidopierri.pantrybe.services.SpringSecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final PasswordConfig passwordConfig;
-    private final SpringSecurityUserDetailsService springSecurityUserDetailsService;
+    private final JwtRequestFilter jwtRequestFilter;
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
-    private String jwkSetUri;
 
     @Autowired
-    public SecurityConfig(PasswordConfig passwordConfig, SpringSecurityUserDetailsService springSecurityUserDetailsService) {
-        this.passwordConfig = passwordConfig;
-        this.springSecurityUserDetailsService = springSecurityUserDetailsService;
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
+        this.jwtRequestFilter = jwtRequestFilter;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .oauth2ResourceServer((oauth2ResourceServer) ->
-                        oauth2ResourceServer
-                                .jwt((jwt) ->
-                                        jwt.decoder(jwtDecoder())
-                                )
-                )
-                .csrf().disable()
+                .addFilterBefore(new CustomCorsFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login","logout","/register-test", "/api/v1/users/create", "/api/v1/pantry/create-pantry").permitAll()
-                        .requestMatchers("/admin").hasRole(Roles.ADMIN.toString())
+                        .requestMatchers(
+                                "/api/v1/users/create",
+                                "/api/v1/pantry/create-pantry",
+                                "/api/v1/users/login/**",
+                                "/api/v1/users/check-email",
+                                "/swagger-ui/**",
+                                "/v3/**")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .permitAll()
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .rememberMe(rememberMe -> rememberMe
-                        //.rememberMeCookieName("remember-me")
-                        .rememberMeParameter("remember-me")
-                        .key("remember-me-key")
-                        .tokenValiditySeconds(24 * 60 * 60)
-                        .userDetailsService(springSecurityUserDetailsService)
-                )
-                .logout(logout -> logout
-                        //.logoutUrl("/logout")
-                        .logoutUrl("/perform_logout")
-                        //.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID", "remember-me")
-                        .logoutSuccessUrl("/login"))
-                .authenticationProvider(daoAuthenticationProvider())    // Tell Spring to use our implementation (Password & Service)
                 .build();
     }
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordConfig.passwordEncoder());
-        provider.setUserDetailsService(springSecurityUserDetailsService);
-        provider.setAuthoritiesMapper(authorities -> authorities);
 
-        return provider;
-    }
     @Bean
-    JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withJwkSetUri(this.jwkSetUri).build();
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("POST", "PUT", "DELETE"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
-
 
 }

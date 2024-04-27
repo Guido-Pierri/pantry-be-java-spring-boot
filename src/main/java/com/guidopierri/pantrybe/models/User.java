@@ -18,6 +18,7 @@ public class User implements UserDetails {
 
     private String username;
     private String email;
+    private String imageUrl;
     @Size(min = 4, max = 64)
     private String password;
     private String firstName;
@@ -26,6 +27,7 @@ public class User implements UserDetails {
     private boolean isAccountNonLocked;
     private boolean isCredentialsNonExpired;
     private boolean isEnabled;
+    private String authProvider;
 
     @Enumerated(EnumType.STRING)
     private Roles roles;
@@ -36,7 +38,18 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(String username, String email, String password, String firstName, String lastName, boolean isAccountNonExpired, boolean isAccountNonLocked, boolean isCredentialsNonExpired, boolean isEnabled, Roles roles, Pantry pantry) {
+    public User(String username,
+                String email,
+                String password,
+                String firstName,
+                String lastName,
+                boolean isAccountNonExpired,
+                boolean isAccountNonLocked,
+                boolean isCredentialsNonExpired,
+                boolean isEnabled,
+                String authProvider,
+                Roles roles,
+                Pantry pantry) {
         this.username = username;
         this.email = email;
         this.password = password;
@@ -46,6 +59,7 @@ public class User implements UserDetails {
         this.isAccountNonLocked = isAccountNonLocked;
         this.isCredentialsNonExpired = isCredentialsNonExpired;
         this.isEnabled = isEnabled;
+        this.authProvider = authProvider;
         this.roles = roles;
         this.pantry = pantry;
     }
@@ -54,9 +68,11 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.getGrantedAuthorities();
     }
+
     public long getId() {
         return id;
     }
+
     @Override
     public String getPassword() {
         return password;
@@ -114,18 +130,17 @@ public class User implements UserDetails {
     public void setCredentialsNonExpired(boolean credentialsNonExpired) {
         isCredentialsNonExpired = credentialsNonExpired;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
+
     public String getEmail(String email) {
         return email;
     }
+
     public void setEnabled(boolean enabled) {
         isEnabled = enabled;
-    }
-
-    public void setAuthority(Roles roles) {
-        this.roles = roles;
     }
 
     public void setPantry(Pantry pantry) {
@@ -154,5 +169,34 @@ public class User implements UserDetails {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(String authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", authProvider='" + authProvider + '\'' +
+                ", pantry=" + pantry +
+                '}';
     }
 }
