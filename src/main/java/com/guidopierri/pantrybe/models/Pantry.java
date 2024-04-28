@@ -56,5 +56,12 @@ public class Pantry {
     public Pantry() {
     }
 
-
+    @Override
+    public String toString() {
+        return "Pantry{" +
+                "id=" + id +
+                ", items=" + items +
+                ", user=" + user +
+                '}';
+    }
 }
