@@ -18,7 +18,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="password" type="varchar(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="roles" type="varchar(255)">
                 <constraints nullable="false"/>
