@@ -1,14 +1,16 @@
 package com.guidopierri.pantrybe.models.dabas.article;
-import com.fasterxml.jackson.annotation.JsonProperty; 
+import com.fasterxml.jackson.annotation.JsonProperty;
 public class Nettoinnehall{
-    @JsonProperty("Enhet") 
+    @JsonProperty("Enhet")
     public Object enhet;
-    @JsonProperty("Mängd") 
+    @JsonProperty("EnhetKod")
+    public String enhetKod;
+    @JsonProperty("Mängd")
     public int mängd;
-    @JsonProperty("Mängd_Formatted") 
+    @JsonProperty("Mängd_Formatted")
     public String mängd_Formatted;
-    @JsonProperty("Typkod") 
+    @JsonProperty("Typkod")
     public int typkod;
-    @JsonProperty("Typ") 
+    @JsonProperty("Typ")
     public String typ;
 }

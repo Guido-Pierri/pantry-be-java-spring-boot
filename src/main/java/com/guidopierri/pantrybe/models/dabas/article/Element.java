@@ -3,10 +3,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 public class Element{
-    @JsonProperty("ElementId") 
+    @JsonProperty("ElementId")
     public String elementId;
-    @JsonProperty("Name") 
+    @JsonProperty("Name")
     public String name;
-    @JsonProperty("ValueSets") 
+    @JsonProperty("ValueSets")
     public ArrayList<ArrayList<ValueSet>> valueSets;
 }

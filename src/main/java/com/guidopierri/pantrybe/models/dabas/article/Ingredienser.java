@@ -2,7 +2,7 @@ package com.guidopierri.pantrybe.models.dabas.article;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
-import java.util.List;
+
 public class Ingredienser{
     @JsonProperty("Beskrivning") 
     public String beskrivning;

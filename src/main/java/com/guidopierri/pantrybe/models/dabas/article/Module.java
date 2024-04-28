@@ -2,14 +2,14 @@ package com.guidopierri.pantrybe.models.dabas.article;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
-import java.util.List;
+
 public class Module{
-    @JsonProperty("ModuleId") 
+    @JsonProperty("ModuleId")
     public String moduleId;
-    @JsonProperty("Name") 
+    @JsonProperty("Name")
     public String name;
-    @JsonProperty("CountryCode") 
+    @JsonProperty("CountryCode")
     public String countryCode;
-    @JsonProperty("Elements") 
+    @JsonProperty("Elements")
     public ArrayList<Element> elements;
 }

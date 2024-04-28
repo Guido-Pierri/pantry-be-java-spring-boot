@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Article{
     @JsonProperty("Artikelbeskrivning") 
@@ -310,7 +311,7 @@ public class Article{
     @JsonProperty("Bruttovikt") 
     public int bruttovikt;
     @JsonProperty("Bredd") 
-    public int bredd;
+    public double bredd;
     @JsonProperty("Djup") 
     public int djup;
     @JsonProperty("Hojd") 
@@ -537,5 +538,45 @@ public class Article{
     public Object påstående;
     @JsonProperty("Modules") 
     public ArrayList<Module> modules;
-
+    @JsonProperty("MinstaEnhetKod")
+    public String minstaEnhetKod;
+    @JsonProperty("ForvaringTemperaturMin")
+    public int forvaringTemperaturMin;
+    @JsonProperty("ForvaringTemperaturMin_Formatted")
+    public String forvaringTemperaturMin_Formatted;
+    @JsonProperty("ForvaringTemperaturMax")
+    public double forvaringTemperaturMax;
+    @JsonProperty("ForvaringTemperaturMax_Formatted")
+    public String forvaringTemperaturMax_Formatted;
+    @JsonProperty("T4242_TemperaturstatusKod")
+    public String t4242_TemperaturstatusKod;
+    @JsonProperty("Bredd_Formatted")
+    public String bredd_Formatted;
+    @JsonProperty("Djup_Formatted")
+    public String djup_Formatted;
+    @JsonProperty("Hojd_Formatted")
+    public String hojd_Formatted;
+    @JsonProperty("Temperaturinformation")
+    public ArrayList<Temperaturinformation> temperaturinformation;
+    @JsonProperty("OpenJarTidText")
+    public String openJarTidText;
+    @JsonProperty("T3816_DimensionTypeCode_Text")
+    public String t3816_DimensionTypeCode_Text;
+    @JsonProperty("Hyllbredd_Formatted")
+    public String hyllbredd_Formatted;
+    @JsonProperty("Hylldjup_Formatted")
+    public String hylldjup_Formatted;
+    @JsonProperty("Hyllhojd_Formatted")
+    public String hyllhojd_Formatted;
+    @JsonProperty("T3848_TypAvStaplingsbarhet_Kod")
+    public String t3848_TypAvStaplingsbarhet_Kod;
+    @JsonProperty("Hanteringsinstruktioner")
+    public List<String> Hanteringsinstruktioner;
+/*
+    public ArrayList<Object> hanteringsinstruktioner;
+*/
+    @JsonProperty("Stacking")
+    public ArrayList<Object> stacking;
+    @JsonProperty("Fuktighetsangivelser")
+    public ArrayList<Object> fuktighetsangivelser;
 }
