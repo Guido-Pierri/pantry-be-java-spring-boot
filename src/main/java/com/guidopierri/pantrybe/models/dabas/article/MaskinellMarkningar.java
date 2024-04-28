@@ -2,7 +2,7 @@ package com.guidopierri.pantrybe.models.dabas.article;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
-import java.util.List;
+
 public class MaskinellMarkningar{
     @JsonProperty("MaskinellMarkningKod") 
     public String maskinellMarkningKod;

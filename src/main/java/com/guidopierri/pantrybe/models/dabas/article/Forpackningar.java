@@ -1,9 +1,9 @@
 package com.guidopierri.pantrybe.models.dabas.article;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.guidopierri.pantrybe.models.dabas.article.Forpackningsmaterial;
 
 import java.util.ArrayList;
-import java.util.List;
+
 public class Forpackningar{
     @JsonProperty("Forpackningstyp") 
     public String forpackningstyp;
