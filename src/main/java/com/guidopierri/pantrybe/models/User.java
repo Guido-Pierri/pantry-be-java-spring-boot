@@ -187,16 +187,5 @@ public class User implements UserDetails {
         this.imageUrl = imageUrl;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", authProvider='" + authProvider + '\'' +
-                ", pantry=" + pantry +
-                '}';
-    }
+    
 }
