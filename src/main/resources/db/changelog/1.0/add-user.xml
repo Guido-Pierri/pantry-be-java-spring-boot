@@ -41,6 +41,9 @@
             <column name="is_enabled" type="boolean">
                 <constraints nullable="true"/>
             </column>
+            <column name="username" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
 
         </createTable>
     </changeSet>
