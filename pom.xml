@@ -198,19 +198,6 @@
                     </deployment>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.24.0</version>
-                <configuration>
-                    <changeLogFile>src/main/resources/db/changelog/db.changelog-master.xml</changeLogFile>
-                    <url>
-                        jdbc:sqlserver://${env.DB_SERVER}:1433;database=${env.DB_NAME};user=${env.DB_USER};password=${env.DB_PASSWORD};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryPassword
-                    </url>
-                    <username>${env.DB_USER}</username>
-                    <password>${env.DB_PASSWORD}</password>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
