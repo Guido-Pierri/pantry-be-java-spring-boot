@@ -38,6 +38,9 @@
             <column name="is_credentials_non_expired" type="boolean">
                 <constraints nullable="true"/>
             </column>
+            <column name="is_enabled" type="boolean">
+                <constraints nullable="true"/>
+            </column>
 
         </createTable>
     </changeSet>
