@@ -16,8 +16,9 @@ public class CustomCorsFilter extends CorsFilter {
 
     private static CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("POST","PUT","DELETE"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000",
+                "https://pantry-fe-nextjs.vercel.app"));
+        configuration.setAllowedMethods(Arrays.asList("POST", "PUT", "DELETE"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
