@@ -23,6 +23,21 @@
             <column name="roles" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="auth_provider" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="image_url" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_account_non_expired" type="boolean">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_account_non_locked" type="boolean">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_credentials_non_expired" type="boolean">
+                <constraints nullable="true"/>
+            </column>
 
         </createTable>
     </changeSet>

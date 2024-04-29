@@ -9,6 +9,5 @@
     <include file="1.0/add-user.xml" relativeToChangelogFile="true"/>
     <include file="1.0/add-pantry.xml" relativeToChangelogFile="true"/>
     <include file="1.0/add-item.xml" relativeToChangelogFile="true"/>
-    <include file="1.0/update-user.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
