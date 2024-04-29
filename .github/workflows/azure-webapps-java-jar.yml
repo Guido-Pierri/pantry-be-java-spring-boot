@@ -45,6 +45,9 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.DISTRIBUTION }}
           cache: 'maven'
+          
+      - name: Run Liquibase update
+        run: mvn liquibase:update -Dliquibase.url=jdbc:sqlserver://${{ secrets.DB_SERVER }}:1433;database=${{ secrets.DB_NAME }};user=${{ secrets.DB_USER }};password=${{ secrets.DB_PASSWORD }};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;authentication=ActiveDirectoryPassword
 
       - name: Build with Maven
         run: mvn clean install
