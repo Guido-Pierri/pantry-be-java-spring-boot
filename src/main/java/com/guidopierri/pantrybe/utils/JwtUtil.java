@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -50,7 +51,6 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaimsWithKey(String token) {
-        logger.info("token: {}", token);
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
@@ -74,6 +74,7 @@ public class JwtUtil {
                 .compact();
     }
 
+    @Cacheable(value = "tokenValidation", key = "#token")
     public Boolean validateTokenWithKey(String token, UserDetails userDetails) {
         final String username = extractUsernameWithKey(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
