@@ -30,15 +30,12 @@ public class ItemService {
 
 
     public ItemDto getItemById(long id) {
-        Item item = itemRepository.findById((long) id).orElse(null);
-        ItemDto itemDto = entityMapper.itemToItemDto(item);
-        assert item != null;
-        //itemDto.setPantryId(item.getPantry().getId());
-        return itemDto;
+        Item item = itemRepository.findById(id).orElse(null);
+        return entityMapper.itemToItemDto(item);
     }
 
     public ItemDto createItem(CreateItemRequest itemRequest) {
-        System.out.println("itemRequest:" + itemRequest);
+        logger.info("itemRequest:" + itemRequest);
         if (itemRequest.id() == 0) {
             //find pantry by id
             if (itemRequest.pantryId().equalsIgnoreCase("0")) {
@@ -47,19 +44,17 @@ public class ItemService {
 
                 //create item
                 ItemDto itemDto = entityMapper.itemRequestToItemDto(itemRequest);
-                System.out.println("pantryId in itemRequest:" + itemRequest.pantryId());
-                System.out.println("itemDto pantryId:" + itemDto.pantryId());
-                Item item = itemRepository.save(entityMapper.itemDtoToItem(itemDto));
+                logger.info("pantryId in itemRequest: {}", itemRequest.pantryId());
+                logger.info("itemDto pantryId: {}", itemDto.pantryId());
+                Item entity = entityMapper.itemDtoToItem(itemDto);
+                logger.info("item entity: {}", entity);
                 Pantry pantry = pantryService.getPantryById(Long.parseLong(itemRequest.pantryId()));
-                System.out.println("pantry:" + pantry);
-                item.setPantry(pantry);
-                System.out.println("item's pantry:" + item.getPantry());
-                //save item to pantry
-                pantryService.addItemToPantry(Long.parseLong(itemRequest.pantryId()), item);
-                //return item
+                entity.setPantry(pantry);
+                Item item = itemRepository.save(entity);
+                logger.info("pantry: {}", pantry);
+                logger.info("item's pantry: {}", item.getPantry());
                 ItemDto returnItem = entityMapper.itemToItemDto(item);
-                //returnItem.setPantryId(item.getPantry().getId());
-                System.out.println("returnItem:" + returnItem);
+                logger.info("returnItem: {}", returnItem);
                 return returnItem;
             }
         }

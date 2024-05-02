@@ -1,9 +1,9 @@
 package com.guidopierri.pantrybe.controllers;
 
 import com.guidopierri.pantrybe.dtos.responses.DabasItemResponse;
-import com.guidopierri.pantrybe.models.dabas.article.Article;
 import com.guidopierri.pantrybe.models.dabas.search.Search;
 import com.guidopierri.pantrybe.services.DabasDataService;
+import com.guidopierri.pantrybe.services.DabasSearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,23 +17,19 @@ import java.util.List;
 @RequestMapping("/api/v1/search")
 public class DabasController {
     private final DabasDataService dabasDataService;
+    private final DabasSearchService dabasSearchService;
 
-    public DabasController(DabasDataService dabasDataService) {
+    public DabasController(DabasDataService dabasDataService, DabasSearchService dabasSearchService) {
         this.dabasDataService = dabasDataService;
+        this.dabasSearchService = dabasSearchService;
     }
 
     private final String externalApiBaseUrl = "https://api.dabas.com/DABASService/V2";
 
     //   private final String externalApiBaseUrlSeach = "https://api.dabas.com/DABASService/V2";
     @GetMapping("/product/{gtin}")
-    public ResponseEntity<DabasItemResponse> fetchProductByGtin(@PathVariable String gtin) {
-        Article article = dabasDataService.getArticle(gtin);
-        if (article == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        String imageLink = (article.bilder != null && article.bilder.size() > 1) ? article.bilder.get(1).lank : null;
-        DabasItemResponse item = new DabasItemResponse(article.produktnamn, article.gTIN, article.varumarke.varumarke, imageLink, article.varugrupp.huvudgruppBenamning);
-        return new ResponseEntity<>(item, HttpStatus.OK);
+    public ResponseEntity<DabasItemResponse> getProductByGtin(@PathVariable String gtin) throws Exception {
+        return dabasSearchService.getProductByGtin(gtin);
     }
 
     @GetMapping("/parameter/{searchParameter}")

@@ -8,6 +8,7 @@ import com.guidopierri.pantrybe.models.Item;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.models.User;
 import com.guidopierri.pantrybe.repositories.PantryRepository;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class PantryService {
     private final PantryRepository pantryRepository;
     private final UserService userService;
     private final EntityMapper entityMapper;
+    private Logger logger = org.slf4j.LoggerFactory.getLogger(PantryService.class);
 
     PantryService(PantryRepository pantryRepository, UserService userService, EntityMapper entityMapper) {
         this.pantryRepository = pantryRepository;
@@ -81,7 +83,7 @@ public class PantryService {
         //FIXME:
         Pantry pantry = getPantryById(pantryId);
         pantry.addItem(item);
-        System.out.println("pantry" + pantry);
+        logger.info("pantry: {}", pantry);
         pantryRepository.save(pantry);
     }
 
