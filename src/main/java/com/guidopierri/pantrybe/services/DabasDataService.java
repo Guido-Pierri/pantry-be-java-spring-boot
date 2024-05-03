@@ -46,7 +46,7 @@ public class DabasDataService implements DataProvider {
             String mainGroup = jsonNode.path("Varugrupp").path("HuvudgruppBenamning").asText();
             JsonNode bilder = jsonNode.path("Bilder");
             Logger.getAnonymousLogger().info("Bilder: " + bilder.asText());
-            String imageLink = (bilder.isArray() && bilder.size() > 1) ? bilder.path(0).path("Lank").asText() : null;
+            String imageLink = (bilder.isArray() && !bilder.isEmpty()) ? bilder.path(0).path("Lank").asText() : null;
 
             return new DabasItemResponse(productName, gtin, brand, imageLink, mainGroup);
         } catch (JsonProcessingException e) {

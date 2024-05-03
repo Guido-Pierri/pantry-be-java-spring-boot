@@ -9,6 +9,7 @@ import com.guidopierri.pantrybe.models.Categories;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.services.ItemService;
 import com.guidopierri.pantrybe.services.PantryService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -68,5 +69,19 @@ public class PantryController {
     @GetMapping("/categories")
     public List<String> getCategories() {
         return Categories.getCategories();
+    }
+
+    @GetMapping("/expire-soon")
+    public List<ItemDto> getItemsByExpiration() {
+        return itemService.getItemsByExpiration();
+    }
+
+    @DeleteMapping("/delete-item/{id}")
+    public ResponseEntity<String> deleteItem(@PathVariable String id) {
+        if (itemService.deleteItem(Long.parseLong(id))) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
