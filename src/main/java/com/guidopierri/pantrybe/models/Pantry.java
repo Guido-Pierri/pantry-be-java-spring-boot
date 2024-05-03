@@ -13,7 +13,7 @@ public class Pantry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany(mappedBy = "pantry", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "pantry", fetch = FetchType.EAGER)
     private List<Item> items;
 
     @OneToOne

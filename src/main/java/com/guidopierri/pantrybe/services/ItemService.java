@@ -6,7 +6,9 @@ import com.guidopierri.pantrybe.dtos.requests.CreateItemRequest;
 import com.guidopierri.pantrybe.models.Item;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.repositories.ItemRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -61,4 +63,21 @@ public class ItemService {
         return null;
     }
 
+    //FIXME
+    public List<ItemDto> getItemsByExpiration() {
+        return null;
+    }
+
+    @Transactional
+    @CacheEvict(value = "items", allEntries = true)
+    public boolean deleteItem(long id) {
+
+        itemRepository.deleteById(id);
+        logger.info("Deleted item with id {}", id);
+        return true;
+
+
+    }
 }
+
+
