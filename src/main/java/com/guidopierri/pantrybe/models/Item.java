@@ -22,7 +22,7 @@ public class Item implements GenericItem {
     public Item() {
     }
 
-    public Item(String name, long quantity, String expirationDate, long gtin, String brand, String image, String category, Pantry pantry) {
+    public Item(String name, long quantity, String expirationDate, String brand, String image, String category, Pantry pantry) {
         this.name = name;
         this.quantity = quantity;
         this.expirationDate = expirationDate;

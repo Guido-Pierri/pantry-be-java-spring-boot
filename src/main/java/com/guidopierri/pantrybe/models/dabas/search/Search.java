@@ -1,9 +1,7 @@
-
 package com.guidopierri.pantrybe.models.dabas.search;
 
 import com.fasterxml.jackson.annotation.*;
 
-import javax.annotation.Generated;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,7 +17,6 @@ import java.util.Map;
         "SkapadDatum",
         "SenastAndradDatum"
 })
-@Generated("jsonschema2pojo")
 public class Search {
 
     @JsonProperty("Forpackningsstorlek")
@@ -41,7 +38,8 @@ public class Search {
     @JsonProperty("SenastAndradDatum")
     private String senastAndradDatum;
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
+
 
     @JsonProperty("Forpackningsstorlek")
     public String getForpackningsstorlek() {
@@ -142,5 +140,6 @@ public class Search {
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
     }
+
 
 }

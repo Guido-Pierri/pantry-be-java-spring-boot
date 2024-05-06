@@ -37,13 +37,13 @@ public class ItemService {
     }
 
     public ItemDto createItem(CreateItemRequest itemRequest) {
+
         logger.info("itemRequest:" + itemRequest);
         if (itemRequest.id() == 0) {
             //find pantry by id
             if (itemRequest.pantryId().equalsIgnoreCase("0")) {
                 return null;
             } else {
-
                 //create item
                 ItemDto itemDto = entityMapper.itemRequestToItemDto(itemRequest);
                 logger.info("pantryId in itemRequest: {}", itemRequest.pantryId());

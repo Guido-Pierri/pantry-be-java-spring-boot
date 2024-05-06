@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v1/search")
 public class DabasController {
@@ -43,11 +43,11 @@ public class DabasController {
     }
 
     @GetMapping("/paginated/parameter/{searchParameter}")
-    public ResponseEntity<Page<Search>> fetchProductBySearchParameterPageable(
+    public ResponseEntity<Page<DabasItemResponse>> fetchProductBySearchParameterPageable(
             @PathVariable String searchParameter,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Page<Search> searchPage = dabasDataService.searchToPageable(searchParameter, page, size);
+            @RequestParam(defaultValue = "10") int size) throws Exception {
+        Page<DabasItemResponse> searchPage = dabasDataService.searchToPageable(searchParameter, page, size);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Page-Number", String.valueOf(searchPage.getNumber()));
         headers.add("X-Page-Size", String.valueOf(searchPage.getSize()));

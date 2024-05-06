@@ -11,7 +11,7 @@ public interface DataProvider {
 
     List<Search> fetchUpaginatedSearch(String searchParameter);
 
-    Page<Search> searchToPageable(String searchParameter, int page, int size);
+    Page<DabasItemResponse> searchToPageable(String searchParameter, int page, int size) throws Exception;
 }
 
 
