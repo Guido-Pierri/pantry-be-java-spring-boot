@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 @Service
 public class DabasDataService implements DataProvider {
+
     private Pageable createPageRequestUsing(int page, int size) {
         return PageRequest.of(page, size);
     }
@@ -69,7 +70,7 @@ public class DabasDataService implements DataProvider {
     @Override
     public List<Search> fetchUpaginatedSearch(String searchParameter) {
         List<Search> searchList = new ArrayList<>();
-        String url = "https://api.dabas.com/DABASService/V2/articles/searchparameter/" + searchParameter + "/JSON?apikey=741ffd2b-3be4-49b8-b837-45be48c7e7be";
+        String url = "https://api.dabas.com/DABASService/V2/articles/basesearchparameter/" + searchParameter + "/JSON?apikey=741ffd2b-3be4-49b8-b837-45be48c7e7be";
         String jsonString;
 
         try {
@@ -117,16 +118,21 @@ public class DabasDataService implements DataProvider {
     }
 
     @Override
-    public Page<Search> searchToPageable(String searchParameter, int page, int size) {
+    public Page<DabasItemResponse> searchToPageable(String searchParameter, int page, int size) throws Exception {
         Pageable pageRequest = createPageRequestUsing(page, size);
 
         List<Search> searchList = fetchUpaginatedSearch(searchParameter);
         int start = (int) pageRequest.getOffset();
         int end = Math.min((start + pageRequest.getPageSize()), searchList.size());
+        List<DabasItemResponse> dtos = new ArrayList<>();
+        for (Search search : searchList) {
+            var item = getArticle(search.getGtin());
+            String imageLink = item.image();
+            dtos.add(new DabasItemResponse(search.getArtikelbenamning(), search.getGtin(), search.getVarumarke(), imageLink, search.getArtikeltyp()));
+        }
+        List<DabasItemResponse> pageContent = dtos.subList(start, end);
 
-        List<Search> pageContent = searchList.subList(start, end);
-
-        return new PageImpl<>(pageContent, pageRequest, searchList.size());
+        return new PageImpl<>(pageContent, pageRequest, dtos.size());
 
     }
 }
