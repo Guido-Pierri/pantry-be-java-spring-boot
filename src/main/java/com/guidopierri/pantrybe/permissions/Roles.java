@@ -9,7 +9,7 @@ import static com.guidopierri.pantrybe.permissions.Permissions.*;
 
 public enum Roles {
     ADMIN(List.of(ADMIN_READ, ADMIN_WRITE, ADMIN_DELETE)),
-    USER(List.of(USER_READ, USER_WRITE));
+    USER(List.of(USER_READ, USER_WRITE, USER_DELETE));
     private final List<Permissions> permissions;
 
     Roles(List<Permissions> permissions) {
