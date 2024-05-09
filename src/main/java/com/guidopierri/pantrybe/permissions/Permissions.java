@@ -5,9 +5,11 @@ public enum Permissions {
     ADMIN_WRITE("admin:write"),
     ADMIN_DELETE("admin:delete"),
     USER_READ("user:read"),
-    USER_WRITE("user:write");
+    USER_WRITE("user:write"),
+    USER_DELETE("user:delete");
 
     public final String permission;
+
     Permissions(String permission) {
         this.permission = permission;
     }

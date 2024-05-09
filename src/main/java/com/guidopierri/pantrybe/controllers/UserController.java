@@ -142,7 +142,7 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasAuthority('admin:delete')")
+    @PreAuthorize("hasAnyAuthority('admin:delete', 'user:delete')")
     public ResponseEntity<DeleteUserResponse> deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
     }
@@ -154,7 +154,6 @@ public class UserController {
         return new ResponseEntity<>(roles, HttpStatus.OK);
     }
 
-    //System.out.println(Arrays.toString(Roles.values()));
     @PutMapping("/update/{id}")
     @PreAuthorize("hasAnyAuthority('admin:write', 'user:write')")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody CreateUserRequest user) {
