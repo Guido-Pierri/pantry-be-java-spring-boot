@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.guidopierri.pantrybe.dtos.responses.DabasItemResponse;
 import com.guidopierri.pantrybe.models.dabas.search.Search;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -20,10 +22,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 public class DabasDataService implements DataProvider {
+
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(DabasDataService.class);
 
     private Pageable createPageRequestUsing(int page, int size) {
         return PageRequest.of(page, size);
@@ -46,7 +50,6 @@ public class DabasDataService implements DataProvider {
             String brand = jsonNode.path("Varumarke").path("Varumarke").asText();
             String mainGroup = jsonNode.path("Varugrupp").path("HuvudgruppBenamning").asText();
             JsonNode bilder = jsonNode.path("Bilder");
-            Logger.getAnonymousLogger().info("Bilder: " + bilder.asText());
             String imageLink = (bilder.isArray() && !bilder.isEmpty()) ? bilder.path(0).path("Lank").asText() : null;
 
             return new DabasItemResponse(productName, gtin, brand, imageLink, mainGroup);
@@ -99,8 +102,7 @@ public class DabasDataService implements DataProvider {
     }
 
     Optional<String> sendApiRequest(String url) throws Exception {
-        System.out.println("inside sendApiRequest");
-        System.out.println("url" + url);
+
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .header("Content-Type", "application/json")
@@ -110,7 +112,7 @@ public class DabasDataService implements DataProvider {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         int statusCode = response.statusCode();
         if (statusCode == 404) {
-            System.out.println("404 Error: Resource not found");
+            log.error("404 Error: Resource not found");
             // Handle it as needed
 
         }
@@ -118,21 +120,26 @@ public class DabasDataService implements DataProvider {
     }
 
     @Override
+    @Cacheable(value = "search", key = "#searchParameter")
     public Page<DabasItemResponse> searchToPageable(String searchParameter, int page, int size) throws Exception {
         Pageable pageRequest = createPageRequestUsing(page, size);
 
         List<Search> searchList = fetchUpaginatedSearch(searchParameter);
+        int pageSize = pageRequest.getPageSize();
         int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), searchList.size());
-        List<DabasItemResponse> dtos = new ArrayList<>();
-        for (Search search : searchList) {
-            var item = getArticle(search.getGtin());
-            String imageLink = item.image();
-            dtos.add(new DabasItemResponse(search.getArtikelbenamning(), search.getGtin(), search.getVarumarke(), imageLink, search.getArtikeltyp()));
-        }
+        int end = Math.min((start + pageSize), searchList.size());
+        List<DabasItemResponse> dtos = searchList.parallelStream()
+                .map(search -> {
+                    try {
+                        var item = getArticle(search.getGtin());
+                        String imageLink = item.image();
+                        return new DabasItemResponse(search.getArtikelbenamning(), search.getGtin(), search.getVarumarke(), imageLink, search.getArtikeltyp());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
         List<DabasItemResponse> pageContent = dtos.subList(start, end);
-
         return new PageImpl<>(pageContent, pageRequest, dtos.size());
-
     }
 }
