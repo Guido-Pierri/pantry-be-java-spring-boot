@@ -120,7 +120,7 @@ public class DabasDataService implements DataProvider {
     }
 
     @Override
-    @Cacheable(value = "search", key = "#searchParameter")
+    @Cacheable(value = "search", key = "{#searchParameter, #page}")
     public Page<DabasItemResponse> searchToPageable(String searchParameter, int page, int size) throws Exception {
         Pageable pageRequest = createPageRequestUsing(page, size);
 
