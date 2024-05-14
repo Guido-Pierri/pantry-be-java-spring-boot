@@ -1,12 +1,9 @@
 package com.guidopierri.pantrybe.config;
 
-import com.guidopierri.pantrybe.dtos.DabasItemDto;
 import com.guidopierri.pantrybe.dtos.ItemDto;
 import com.guidopierri.pantrybe.dtos.PantryDto;
 import com.guidopierri.pantrybe.dtos.UserDto;
-import com.guidopierri.pantrybe.dtos.requests.CreateDabasItemRequest;
 import com.guidopierri.pantrybe.dtos.requests.CreateItemRequest;
-import com.guidopierri.pantrybe.dtos.requests.CreatePantryRequest;
 import com.guidopierri.pantrybe.dtos.responses.DabasItemResponse;
 import com.guidopierri.pantrybe.dtos.responses.UserResponse;
 import com.guidopierri.pantrybe.models.DabasItem;
@@ -18,6 +15,7 @@ import org.mapstruct.ReportingPolicy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
 
 @Component
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -51,13 +49,13 @@ public interface EntityMapper {
 
     }
 
-    ;
+    DabasItem dabasItemResponseToDabasItem(DabasItemResponse dabasItemResponse);
+
+    DabasItemResponse dabasItemToDabasItemResponse(DabasItem dabasItem);
 
     Item itemDtoToItem(ItemDto itemDto);
 
     ItemDto itemRequestToItemDto(CreateItemRequest itemRequest);
-
-    DabasItem customItemRequestToCustomItem(CreateDabasItemRequest itemRequest);
 
     PantryDto pantryToPantryDto(Pantry pantry);
 
@@ -65,9 +63,11 @@ public interface EntityMapper {
 
     UserResponse userToUserResponse(User user);
 
-    Pantry pantryRequestToPantry(CreatePantryRequest request);
+    default List<DabasItemResponse> convertListOfEmployeeToListOfEmployeeResponse(List<DabasItem> item) {
 
-    DabasItemResponse customItemToCustomItemResponse(DabasItem item);
+        return item.stream()
+                .map(this::dabasItemToDabasItemResponse).toList();
 
-    List<DabasItemDto> customItemToCustomItemDto(List<DabasItem> customItems);
+    }
+
 }

@@ -141,5 +141,19 @@ public class Search {
         this.additionalProperties.put(name, value);
     }
 
-
+    @Override
+    public String toString() {
+        return "Search{" +
+                "forpackningsstorlek='" + forpackningsstorlek + '\'' +
+                ", varumarke='" + varumarke + '\'' +
+                ", gtin='" + gtin + '\'' +
+                ", artikelbenamning='" + artikelbenamning + '\'' +
+                ", tillverkarensArtikelnummer='" + tillverkarensArtikelnummer + '\'' +
+                ", hyllkantstext='" + hyllkantstext + '\'' +
+                ", artikeltyp='" + artikeltyp + '\'' +
+                ", skapadDatum='" + skapadDatum + '\'' +
+                ", senastAndradDatum='" + senastAndradDatum + '\'' +
+                ", additionalProperties=" + additionalProperties +
+                '}';
+    }
 }

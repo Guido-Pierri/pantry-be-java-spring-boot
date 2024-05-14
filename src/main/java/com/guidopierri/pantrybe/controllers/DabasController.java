@@ -1,6 +1,7 @@
 package com.guidopierri.pantrybe.controllers;
 
 import com.guidopierri.pantrybe.dtos.responses.DabasItemResponse;
+import com.guidopierri.pantrybe.models.DabasItem;
 import com.guidopierri.pantrybe.models.dabas.search.Search;
 import com.guidopierri.pantrybe.services.DabasDataService;
 import com.guidopierri.pantrybe.services.DabasSearchService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 //@CrossOrigin(origins = "*")
 @RestController
@@ -31,7 +33,7 @@ public class DabasController {
 
     //   private final String externalApiBaseUrlSeach = "https://api.dabas.com/DABASService/V2";
     @GetMapping("/product/{gtin}")
-    public ResponseEntity<DabasItemResponse> getProductByGtin(@PathVariable String gtin) throws Exception {
+    public ResponseEntity<Optional<DabasItemResponse>> getProductByGtin(@PathVariable String gtin) throws Exception {
         return dabasSearchService.getProductByGtin(gtin);
     }
 
@@ -59,5 +61,15 @@ public class DabasController {
         log.debug("searchPage: {}", searchPage);
         return ResponseEntity.ok().headers(headers).body(searchPage);
 
+    }
+
+    @GetMapping("/import")
+    public ResponseEntity<List<DabasItemResponse>> importArticles() throws Exception {
+        return new ResponseEntity<>(dabasDataService.importArticlesGtin(), HttpStatus.OK);
+    }
+
+    @PostMapping("/sanitize")
+    public ResponseEntity<List<DabasItem>> sanitizeArticles() {
+        return new ResponseEntity<>(dabasDataService.sanitize(), HttpStatus.OK);
     }
 }

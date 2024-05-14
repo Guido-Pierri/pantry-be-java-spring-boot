@@ -5,9 +5,10 @@ import com.guidopierri.pantrybe.models.dabas.search.Search;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DataProvider {
-    DabasItemResponse getArticle(String gtin) throws Exception;
+    Optional<DabasItemResponse> getArticle(String gtin) throws Exception;
 
     List<Search> fetchUpaginatedSearch(String searchParameter);
 
