@@ -1,0 +1,43 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="4" author="gp">
+        <createTable tableName="dabas_item">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="gtin" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="brand" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="image" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="category" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="size" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ingredients" type="varchar(MAX)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="product_classifications" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="brute_weight" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="drained_weight" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

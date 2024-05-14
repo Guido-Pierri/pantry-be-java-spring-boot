@@ -5,6 +5,7 @@ import com.guidopierri.pantrybe.dtos.UserDto;
 import com.guidopierri.pantrybe.dtos.requests.CreatePantryRequest;
 import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.models.Pantry;
+import com.guidopierri.pantrybe.permissions.Roles;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +32,7 @@ class PantryServiceIT {
                 "test",
                 "test",
                 "test",
-                "test",
+                Roles.USER.name(),
                 "test");
         UserDto userDto = userService.createUser(createUserRequest);
         PantryDto newPantry = pantryService.createPantry(new CreatePantryRequest(0, userDto.id()));

@@ -1,108 +1,34 @@
 package com.guidopierri.pantrybe.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
-public class DabasItem implements GenericItem{
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+public class DabasItem implements GenericItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String gtin;
     private String name;
-    private long quantity;
-    private String expirationDate;
     private String brand;
     private String image;
     private String category;
-
-    private Pantry pantry;
-
-    public DabasItem() {
-    }
-
-    public DabasItem(String name, String gtin, long quantity, String expirationDate, String brand, String image, String category, Pantry pantry) {
-        this.name = name;
-        this.gtin = gtin;
-        this.quantity = quantity;
-        this.expirationDate = expirationDate;
-        this.brand = brand;
-        this.image = image;
-        this.category = category;
-        this.pantry = pantry;
-    }
-
-    @Override
-    public String toString() {
-        return "CustomItem{" +
-                "id=" + id +
-                ", gtin='" + gtin + '\'' +
-                ", name='" + name + '\'' +
-                ", quantity=" + quantity +
-                ", expirationDate='" + expirationDate + '\'' +
-                ", brand='" + brand + '\'' +
-                ", image='" + image + '\'' +
-                ", category='" + category + '\'' +
-                ", pantry=" + pantry +
-                '}';
-    }
+    private String size;
+    @Column(columnDefinition = "VARCHAR(MAX)")
+    private String ingredients;
+    private String productClassifications;
+    private String bruteWeight;
+    private String drainedWeight;
 
     public long getId() {
-        return this.id;
+        return id;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public long getQuantity() {
-        return this.quantity;
-    }
-
-    public String getExpirationDate() {
-        return this.expirationDate;
-    }
-
-    public String getBrand() {
-        return this.brand;
-    }
-
-    public String getImage() {
-        return this.image;
-    }
-
-    public String getCategory() {
-        return this.category;
-    }
-
-    public Pantry getPantry() {
-        return this.pantry;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setQuantity(long quantity) {
-        this.quantity = quantity;
-    }
-
-    public void setExpirationDate(String expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    @JsonIgnore
-    public void setPantry(Pantry pantry) {
-        this.pantry = pantry;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getGtin() {
@@ -111,5 +37,94 @@ public class DabasItem implements GenericItem{
 
     public void setGtin(String gtin) {
         this.gtin = gtin;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(String ingredients) {
+        this.ingredients = ingredients;
+    }
+
+    public String getProductClassifications() {
+        return productClassifications;
+    }
+
+    public void setProductClassifications(String productClassifications) {
+        this.productClassifications = productClassifications;
+    }
+
+    public String getBruteWeight() {
+        return bruteWeight;
+    }
+
+    public void setBruteWeight(String bruteWeight) {
+        this.bruteWeight = bruteWeight;
+    }
+
+    public String getDrainedWeight() {
+        return drainedWeight;
+    }
+
+    public void setDrainedWeight(String drainedWeight) {
+        this.drainedWeight = drainedWeight;
+    }
+
+    @Override
+    public String toString() {
+        return "DabasItem{" +
+                "id=" + id +
+                ", gtin='" + gtin + '\'' +
+                ", name='" + name + '\'' +
+                ", brand='" + brand + '\'' +
+                ", image='" + image + '\'' +
+                ", category='" + category + '\'' +
+                ", size='" + size + '\'' +
+                ", ingredients='" + ingredients + '\'' +
+                ", productClassifications='" + productClassifications + '\'' +
+                ", bruteWeight='" + bruteWeight + '\'' +
+                ", drainedWeight='" + drainedWeight + '\'' +
+                '}';
     }
 }
