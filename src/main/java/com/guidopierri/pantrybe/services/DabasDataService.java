@@ -248,7 +248,7 @@ public class DabasDataService implements DataProvider {
         try {
             List<DabasItem> items = mapper.readValue(inputStream, typeReference);
             log.info("Nr of items seeded: {}", items.size());
-            saveAll(items.subList(0, 999));
+            saveAll(items.subList(0, 1999));
             log.info("Items Saved!");
         } catch (IOException e) {
             log.info("Unable to save users: {}", e.getMessage());
