@@ -128,7 +128,8 @@ public class DabasDataService implements DataProvider {
     @Override
     public List<Search> fetchUpaginatedSearch(String searchParameter) {
         List<Search> searchList = new ArrayList<>();
-        String url = "https://api.dabas.com/DABASService/V2/articles/basesearchparameter/" + searchParameter + "/JSON?apikey=741ffd2b-3be4-49b8-b837-45be48c7e7be";
+        String encodedSearchParameter = searchParameter.replace(" ", "%20");
+        String url = "https://api.dabas.com/DABASService/V2/articles/basesearchparameter/" + encodedSearchParameter + "/JSON?apikey=741ffd2b-3be4-49b8-b837-45be48c7e7be";
         String jsonString;
 
         try {
@@ -190,7 +191,7 @@ public class DabasDataService implements DataProvider {
         int pageSize = pageRequest.getPageSize();
         int start = (int) pageRequest.getOffset();
         int end = Math.min((start + pageSize), searchList.size());
-        List<DabasItemResponse> dtos = searchList.parallelStream()
+        List<DabasItemResponse> dtos = searchList.stream()
                 .map(search -> {
                     var item = getArticleByGtin(search.getGtin());
                     if (item.isEmpty()) {
@@ -228,9 +229,7 @@ public class DabasDataService implements DataProvider {
         log.info("All items: {}", allItems.size());
         log.info("Grouped by GTIN: {}", groupedByGtin.size());
         log.info("Duplicates: {}", allItems.size() - groupedByGtin.size());
-        // Now, duplicates list contains all the duplicate items
-        // You can delete them from the database
-        // Return the list of unique items
+
         allItems = dabasItemRepository.findAll();
         log.info("All items: {}", allItems.size());
         return allItems;
@@ -253,7 +252,6 @@ public class DabasDataService implements DataProvider {
         } catch (IOException e) {
             log.info("Unable to save users: {}", e.getMessage());
         }
-        //entityMapper.convertListOfEmployeeToListOfEmployeeResponse(dabasItemRepository.findAll());
     }
 
     @Scheduled(cron = "0 2 * * 0") // run every week at 2:00 AM
@@ -295,13 +293,13 @@ public class DabasDataService implements DataProvider {
         return articles;
     }
 
-    private List<DabasItemResponse> getEmployeeByIds(List<Long> employeeIds) {
-        return entityMapper.convertListOfEmployeeToListOfEmployeeResponse(dabasItemRepository.findAllById(employeeIds));
+    private List<DabasItemResponse> getDabasItemsByIds(List<Long> dabasItemsIds) {
+        return entityMapper.convertListOfEmployeeToListOfEmployeeResponse(dabasItemRepository.findAllById(dabasItemsIds));
     }
 
     public List<DabasItemResponse> search(SearchParams search, Pageable pageable) {
         Page<Long> page = findIdsBySpecification(new DabasItemSearchSpecification(search), pageable, DabasItem.class);
-        return getEmployeeByIds(page.getContent());
+        return getDabasItemsByIds(page.getContent());
     }
 
 
