@@ -183,7 +183,7 @@ public class DabasDataService implements DataProvider {
 
     @Override
     @Cacheable(value = "search", key = "{#searchParameter, #page}")
-    public Page<DabasItemResponse> searchToPageable(String searchParameter, int page, int size) throws Exception {
+    public Page<DabasItemResponse> searchToPageable(String searchParameter, int page, int size) {
         Pageable pageRequest = createPageRequestUsing(page, size);
 
         List<Search> searchList = fetchUpaginatedSearch(searchParameter);
@@ -193,12 +193,8 @@ public class DabasDataService implements DataProvider {
         int end = Math.min((start + pageSize), searchList.size());
         List<DabasItemResponse> dtos = searchList.stream()
                 .map(search -> {
-                    var item = getArticleByGtin(search.getGtin());
-                    if (item.isEmpty()) {
-                        return new DabasItemResponse(search.getGtin(), search.getArtikelbenamning(), search.getVarumarke(), null, search.getArtikeltyp(), null, null, null, null, null);
-                    }
-                    String imageLink = item.get().getImage();
-                    return new DabasItemResponse(search.getGtin(), search.getArtikelbenamning(), search.getVarumarke(), imageLink, search.getArtikeltyp(), null, null, null, null, null);
+                    DabasItemResponse item = getArticleByGtin(search.getGtin()).orElseThrow();
+                    return new DabasItemResponse(item.gtin(), item.name(), item.brand(), item.image(), item.category(), item.size(), item.ingredients(), item.productClassifications(), item.bruteWeight(), item.drainedWeight());
 
                 })
                 .collect(Collectors.toList());
@@ -206,8 +202,8 @@ public class DabasDataService implements DataProvider {
         return new PageImpl<>(pageContent, pageRequest, dtos.size());
     }
 
-    private Optional<DabasItem> getArticleByGtin(String gtin) {
-        return dabasItemRepository.findDabasItemByGtin(gtin);
+    private Optional<DabasItemResponse> getArticleByGtin(String gtin) {
+        return Optional.of(entityMapper.dabasItemToDabasItemResponse(dabasItemRepository.findDabasItemByGtin(gtin).orElseThrow()));
     }
 
     public List<DabasItem> sanitize() {
