@@ -191,19 +191,26 @@ public class DabasDataService implements DataProvider {
         int pageSize = pageRequest.getPageSize();
         int start = (int) pageRequest.getOffset();
         int end = Math.min((start + pageSize), searchList.size());
-        List<DabasItemResponse> dtos = searchList.stream()
-                .map(search -> {
-                    DabasItemResponse item = getArticleByGtin(search.getGtin()).orElseThrow();
+        Set<DabasItemResponse> dtos = searchList.stream()
+                .map(search -> getArticleByGtin(search.getGtin()).orElse(null))
+                .filter(Objects::nonNull)
+                .map(item -> {
+                    log.info("item: {}", item);
                     return new DabasItemResponse(item.gtin(), item.name(), item.brand(), item.image(), item.category(), item.size(), item.ingredients(), item.productClassifications(), item.bruteWeight(), item.drainedWeight());
 
                 })
-                .collect(Collectors.toList());
-        List<DabasItemResponse> pageContent = dtos.subList(start, end);
+                .collect(Collectors.toSet());
+        List<DabasItemResponse> pageContent = dtos.stream().toList().subList(start, end);
         return new PageImpl<>(pageContent, pageRequest, dtos.size());
     }
 
     private Optional<DabasItemResponse> getArticleByGtin(String gtin) {
-        return Optional.of(entityMapper.dabasItemToDabasItemResponse(dabasItemRepository.findDabasItemByGtin(gtin).orElseThrow()));
+        log.info("gtin: {}", gtin);
+        DabasItem dabasItem = dabasItemRepository.findDabasItemByGtin(gtin).orElse(null);
+        if (dabasItem == null) {
+            return Optional.empty();
+        }
+        return Optional.of(entityMapper.dabasItemToDabasItemResponse(dabasItem));
     }
 
     public List<DabasItem> sanitize() {
