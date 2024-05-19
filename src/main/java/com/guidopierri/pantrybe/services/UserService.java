@@ -1,14 +1,12 @@
 package com.guidopierri.pantrybe.services;
 
 import com.guidopierri.pantrybe.config.EntityMapper;
-import com.guidopierri.pantrybe.dtos.PantryDto;
 import com.guidopierri.pantrybe.dtos.UserDto;
 import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.dtos.requests.UpdateUserRequest;
 import com.guidopierri.pantrybe.dtos.responses.DeleteUserResponse;
 import com.guidopierri.pantrybe.dtos.responses.UserResponse;
 import com.guidopierri.pantrybe.exceptions.UserNotFoundException;
-import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.models.User;
 import com.guidopierri.pantrybe.permissions.Roles;
 import com.guidopierri.pantrybe.repositories.PantryRepository;
@@ -16,6 +14,8 @@ import com.guidopierri.pantrybe.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +24,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,14 +45,17 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Cacheable(value = "users")
     public List<User> getUsers() {
         return userRepository.findAll();
     }
 
+    @Cacheable(value = "users", key = "#id")
     public User getUserById(long id) {
         return (userRepository.findById(id).orElse(null));
     }
 
+    @CacheEvict(value = "users", allEntries = true)
     public UserDto createUser(CreateUserRequest user) {
         logger.info("Creating user");
         logger.info(user.toString());
@@ -69,7 +71,7 @@ public class UserService implements UserDetailsService {
                     newUser.setPassword(null);
                 } else {
                     logger.info("Password before encoding: {}", user.password());
-                    newUser.setPassword(passwordEncoder.encode(user.password()));
+                    newUser.setPassword(user.password());
                     logger.info("Password after encoding: {}", newUser.getPassword());
 
                 }
@@ -88,19 +90,7 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
-    public List<Pantry> convertToPantry(List<PantryDto> dtoList) {
-        List<Pantry> pantryList = new ArrayList<>();
-
-        for (PantryDto dto : dtoList) {
-
-            Pantry pantry = new Pantry();
-            pantry.setId(dto.id());
-            pantry.setUser(userRepository.findById(dto.userId()).orElse(null));
-            pantryList.add(pantry);
-        }
-        return pantryList;
-    }
-
+    @Cacheable(value = "users", key = "#email")
     public ResponseEntity<UserResponse> getUserByEmail(String email) {
         Optional<User> user = userRepository.findUserByEmail(email);
         if (user.isEmpty()) {
@@ -111,31 +101,31 @@ public class UserService implements UserDetailsService {
 
     }
 
+    @Cacheable(value = "users", key = "#email")
     public User getByemail(String email) {
         return userRepository.findUserByEmail(email).orElse(null);
     }
 
+    @Cacheable(value = "users", key = "#email")
     public User getUserByemailAndPassword(String email, String password) {
         return userRepository.findUserByEmailAndPassword(email, password).orElse(null);
     }
 
     @Override
+    @Cacheable(value = "users", key = "#username")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        // TODO - What if we do not FIND user?
-
-        return userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with username: " + username);
+        }
+        return user;
     }
 
     @Transactional
+    @CacheEvict(value = "users", allEntries = true)
     public ResponseEntity<DeleteUserResponse> deleteUser(Long userId) {
-        // Find the user
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-
-        // Delete the associated records in the pantry table
         pantryRepository.deleteByUser(user);
-
-        // Delete the user
         userRepository.delete(user);
         return new ResponseEntity<>(new DeleteUserResponse("User deleted successfully"), HttpStatus.OK);
     }
@@ -144,6 +134,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findUserByEmail(email).isPresent();
     }
 
+    @CacheEvict(value = "users", key = "#id")
     public UserResponse updateUser(Long id, CreateUserRequest user) {
         User userToUpdate = userRepository.findById(id).orElse(null);
         if (!Objects.equals(user.roles(), Roles.USER.toString())) {
@@ -162,6 +153,7 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
+    @CacheEvict(value = "users", allEntries = true)
     public UserResponse updateUserProfile(Long id, UpdateUserRequest user) {
         User userToUpdate = userRepository.findById(id).orElse(null);
 
@@ -169,9 +161,6 @@ public class UserService implements UserDetailsService {
             userToUpdate.setFirstName(user.firstName());
             userToUpdate.setLastName(user.lastName());
             userToUpdate.setEmail(user.email());
-            //userToUpdate.setImageUrl(user.imageUrl());
-            //userToUpdate.setPassword(user.password());
-            //userToUpdate.setRoles(Roles.valueOf(user.roles()));
             userRepository.save(userToUpdate);
             return entityMapper.userToUserResponse(userToUpdate);
         }

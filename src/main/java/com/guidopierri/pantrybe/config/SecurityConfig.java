@@ -38,7 +38,6 @@ public class SecurityConfig {
                 .addFilterBefore(customCorsFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
-                //.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(

@@ -57,6 +57,7 @@ public class DabasDataService implements DataProvider {
         return PageRequest.of(page, size);
     }
 
+    @Cacheable(value = "articles", key = "#gtinNumber")
     @Override
     public Optional<DabasItemResponse> getArticle(String gtinNumber) throws Exception {
         String url = "https://api.dabas.com/DABASService/V2/article/gtin/" + gtinNumber + "/JSON?apikey=741ffd2b-3be4-49b8-b837-45be48c7e7be";
