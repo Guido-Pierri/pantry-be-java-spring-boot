@@ -54,9 +54,7 @@ public class UserController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap<String, String>().put("message", "User not found"));
         }
-        logger.info("UserDetails: {}", userDetails);
         User user = userService.getUserByemailAndPassword(email, userDetails.getPassword());
-        logger.info("User: {}", user);
 
 
         final String jwt = jwtUtil.generateToken(userDetails);
@@ -74,9 +72,7 @@ public class UserController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap<String, String>().put("message", "User not found"));
         }
-        logger.info("UserDetails: {}", userDetails);
         User user = userService.getUserByemailAndPassword(email, userDetails.getPassword());
-        logger.info("User: {}", user);
         String encodedPassword = passwordEncoder.encode(password);
         if (!passwordEncoder.matches(password, encodedPassword)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<String, String>().put("message", "Invalid password"));
@@ -90,7 +86,6 @@ public class UserController {
 
     @PostMapping("/check-email")
     public ResponseEntity<Map<String, Boolean>> checkEmail(@RequestBody String token) {
-        logger.info("token: {}", token);
         Jwt jwt = jwtUtil.jwtDecoder().decode(token);
         String email = jwt.getClaimAsString("email");
         Map<String, Boolean> response = new HashMap<>();
