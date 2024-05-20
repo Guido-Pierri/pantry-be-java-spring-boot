@@ -87,4 +87,23 @@ public class PantryService {
         pantryRepository.save(pantry);
     }
 
+    public List<String> getPantryCategories() {
+        return pantryRepository.findAll().stream()
+                .map(Pantry::getItems)
+                .flatMap(List::stream)
+                .map(Item::getCategory)
+                .distinct()
+                .collect(Collectors.toList());
+
+    }
+
+    public List<String> getPantriesByItemName() {
+        return pantryRepository.findAll().stream()
+                .map(Pantry::getItems)
+                .flatMap(List::stream)
+                .map(Item::getName)
+                .distinct()
+                .collect(Collectors.toList());
+
+    }
 }
