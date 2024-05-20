@@ -16,19 +16,23 @@ public enum Categories {
      *  SWEETS(List.of(CANDY, CHOCOLATE, COOKIES, CAKE)),
      *  OTHER(List.of(OTHER));
      */
-    FRUIT,
-    VEGETABLE,
-    FISH,
-    MEAT,
-    POULTRY,
-    DAIRY,
-    BAKERY,
-    SWEETS,
-    OTHER;
+    Frukt,
+    Grönsaker,
+    Öl,
+    Ris,
+    Baljväxter,
+    Potatis,
+    Fisk,
+    Kött,
+    Kyckling,
+    Mjölk,
+    Bröd,
+    Sötsaker,
+    Annat;
 
     public static List<String> getCategories() {
-    return Arrays.stream(Categories.values())
-                 .map(Enum::name)
-                 .collect(Collectors.toList());
-}
+        return Arrays.stream(Categories.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+    }
 }

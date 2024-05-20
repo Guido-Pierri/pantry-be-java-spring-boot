@@ -9,13 +9,13 @@ import com.guidopierri.pantrybe.models.Categories;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.services.ItemService;
 import com.guidopierri.pantrybe.services.PantryService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-//@CrossOrigin(origins = "*")
 @RequestMapping("/api/v1/pantry")
 public class PantryController {
     private final PantryService pantryService;
@@ -83,5 +83,11 @@ public class PantryController {
         } else {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/article-categories")
+    public ResponseEntity<List<String>> getAllItemsCategories() {
+        List<String> categories = pantryService.getPantriesByItemName();
+        return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 }
