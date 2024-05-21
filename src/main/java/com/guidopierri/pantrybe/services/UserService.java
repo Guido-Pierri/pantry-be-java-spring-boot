@@ -71,7 +71,7 @@ public class UserService implements UserDetailsService {
                     newUser.setPassword(null);
                 } else {
                     logger.info("Password before encoding: {}", user.password());
-                    newUser.setPassword(user.password());
+                    newUser.setPassword(passwordEncoder.encode(user.password()));
                     logger.info("Password after encoding: {}", newUser.getPassword());
 
                 }
