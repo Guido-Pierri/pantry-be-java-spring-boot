@@ -55,8 +55,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap<String, String>().put("message", "User not found"));
         }
         User user = userService.getUserByemailAndPassword(email, userDetails.getPassword());
-
-
         final String jwt = jwtUtil.generateToken(userDetails);
 
         return new ResponseEntity<>(new UserResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getImageUrl(), user.getPassword(), user.getRoles().name(), jwt),
@@ -72,11 +70,13 @@ public class UserController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap<String, String>().put("message", "User not found"));
         }
-        User user = userService.getUserByemailAndPassword(email, userDetails.getPassword());
-        String encodedPassword = passwordEncoder.encode(password);
-        if (!passwordEncoder.matches(password, encodedPassword)) {
+        logger.info("Password: {} ", password);
+        logger.info("dbpass: {}", userDetails.getPassword());
+        logger.info("matches: {}", passwordEncoder.matches(password, userDetails.getPassword()));
+        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<String, String>().put("message", "Invalid password"));
         }
+        User user = userService.getUserByemailAndPassword(email, userDetails.getPassword());
 
         final String jwt = jwtUtil.generateToken(userDetails);
 
