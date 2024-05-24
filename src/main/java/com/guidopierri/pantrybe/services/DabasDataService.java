@@ -182,6 +182,22 @@ public class DabasDataService implements DataProvider {
         return response.body().describeConstable();
     }
 
+    public List<DabasItemResponse> search(String searchParameter) {
+        List<Search> searchList = fetchUpaginatedSearch(searchParameter);
+        log.info("searchList: {}", searchList);
+
+        Set<DabasItemResponse> dtos = searchList.stream()
+                .map(search -> getArticleByGtin(search.getGtin()).orElse(null))
+                .filter(Objects::nonNull)
+                .map(item -> {
+                    log.info("item: {}", item);
+                    return new DabasItemResponse(item.gtin(), item.name(), item.brand(), item.image(), item.category(), item.size(), item.ingredients(), item.productClassifications(), item.bruteWeight(), item.drainedWeight());
+
+                })
+                .collect(Collectors.toSet());
+        return dtos.stream().toList();
+    }
+
     @Override
     @Cacheable(value = "search", key = "{#searchParameter, #page}")
     public Page<DabasItemResponse> searchToPageable(String searchParameter, int page, int size) {

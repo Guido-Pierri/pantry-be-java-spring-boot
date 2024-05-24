@@ -2,7 +2,6 @@ package com.guidopierri.pantrybe.controllers;
 
 import com.guidopierri.pantrybe.dtos.responses.DabasItemResponse;
 import com.guidopierri.pantrybe.models.DabasItem;
-import com.guidopierri.pantrybe.models.dabas.search.Search;
 import com.guidopierri.pantrybe.services.DabasDataService;
 import com.guidopierri.pantrybe.services.DabasSearchService;
 import org.slf4j.Logger;
@@ -38,13 +37,9 @@ public class DabasController {
     }
 
     @GetMapping("/parameter/{searchParameter}")
-    public ResponseEntity<List<Search>> fetchProductBySearchParameter(@PathVariable String searchParameter) {
-        /*
-         * FIXME: Pageable response
-         *  https://www.baeldung.com/spring-data-jpa-pagination-sorting
-         *  https://www.baeldung.com/rest-api-pagination-in-spring
-         */
-        return new ResponseEntity<>(dabasDataService.fetchUpaginatedSearch(searchParameter), HttpStatus.OK);
+    public ResponseEntity<List<DabasItemResponse>> fetchProductBySearchParameter(@PathVariable String searchParameter) {
+
+        return new ResponseEntity<>(dabasDataService.search(searchParameter), HttpStatus.OK);
     }
 
     @GetMapping("/paginated/parameter/{searchParameter}")
