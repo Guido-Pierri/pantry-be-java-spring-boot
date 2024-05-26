@@ -4,6 +4,7 @@ import com.guidopierri.pantrybe.models.Item;
 import org.slf4j.Logger;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Override
     public List<Item> findAll();
 
-    /*@Modifying
-    @Query("DELETE FROM Item i WHERE i.id = ?1")*/
-    //void deleteItemById(long id);
+    @Transactional
+    void deleteByPantryId(Long pantryId);
+
 }

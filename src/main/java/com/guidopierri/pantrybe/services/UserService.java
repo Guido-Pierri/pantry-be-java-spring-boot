@@ -9,6 +9,7 @@ import com.guidopierri.pantrybe.dtos.responses.UserResponse;
 import com.guidopierri.pantrybe.exceptions.UserNotFoundException;
 import com.guidopierri.pantrybe.models.User;
 import com.guidopierri.pantrybe.permissions.Roles;
+import com.guidopierri.pantrybe.repositories.ItemRepository;
 import com.guidopierri.pantrybe.repositories.PantryRepository;
 import com.guidopierri.pantrybe.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -34,15 +35,17 @@ public class UserService implements UserDetailsService {
     private final EntityMapper entityMapper;
     private final PantryRepository pantryRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final ItemRepository itemRepository;
 
     Logger logger = org.slf4j.LoggerFactory.getLogger(UserService.class);
 
     @Autowired
-    public UserService(UserRepository userRepository, EntityMapper entityMapper, PantryRepository pantryRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, EntityMapper entityMapper, PantryRepository pantryRepository, BCryptPasswordEncoder passwordEncoder, ItemRepository itemRepository) {
         this.userRepository = userRepository;
         this.entityMapper = entityMapper;
         this.pantryRepository = pantryRepository;
         this.passwordEncoder = passwordEncoder;
+        this.itemRepository = itemRepository;
     }
 
     @Cacheable(value = "users")
@@ -125,6 +128,7 @@ public class UserService implements UserDetailsService {
     @CacheEvict(value = "users", allEntries = true)
     public ResponseEntity<DeleteUserResponse> deleteUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        itemRepository.deleteByPantryId(user.getPantry().getId());
         pantryRepository.deleteByUser(user);
         userRepository.delete(user);
         return new ResponseEntity<>(new DeleteUserResponse("User deleted successfully"), HttpStatus.OK);
