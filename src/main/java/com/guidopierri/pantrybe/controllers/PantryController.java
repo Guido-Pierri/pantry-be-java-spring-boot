@@ -85,9 +85,15 @@ public class PantryController {
         }
     }
 
-    @GetMapping("/article-categories")
-    public ResponseEntity<List<String>> getAllItemsCategories() {
-        List<String> categories = pantryService.getPantriesByItemName();
+    @GetMapping("/article-categories/{id}")
+    public ResponseEntity<List<String>> getAllItemsCategories(@PathVariable String id) {
+        List<String> categories = pantryService.getPantryCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
+    }
+
+    @GetMapping("/article-names/{id}")
+    public ResponseEntity<List<String>> getAllItemsNames(@PathVariable String id) {
+        List<String> names = pantryService.getPantryItemsNames(id);
+        return new ResponseEntity<>(names, HttpStatus.OK);
     }
 }
