@@ -97,8 +97,9 @@ public class PantryService {
 
     }
 
-    public List<String> getPantriesByItemName() {
-        return pantryRepository.findAll().stream()
+    public List<String> getPantryItemsNames(String id) {
+        User user = userService.getUserById(Long.parseLong(id));
+        return pantryRepository.findById(user.getPantry().getId()).stream()
                 .map(Pantry::getItems)
                 .flatMap(List::stream)
                 .map(Item::getName)
