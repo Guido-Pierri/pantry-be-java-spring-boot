@@ -19,6 +19,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -45,6 +46,8 @@ public class DabasDataService implements DataProvider {
     private final DabasItemRepository dabasItemRepository;
     private final EntityMapper entityMapper;
     private final EntityManager entityManager;
+    @Value("${api-key}")
+    private String apiKey;
 
     public DabasDataService(ItemService itemService, DabasItemRepository dabasItemRepository, EntityMapper entityMapper, EntityManager entityManager) {
         this.itemService = itemService;
@@ -57,10 +60,12 @@ public class DabasDataService implements DataProvider {
         return PageRequest.of(page, size);
     }
 
+
     @Cacheable(value = "articles", key = "#gtinNumber")
     @Override
     public Optional<DabasItemResponse> getArticle(String gtinNumber) throws Exception {
-        String url = "https://api.dabas.com/DABASService/V2/article/gtin/" + gtinNumber + "/JSON?apikey=741ffd2b-3be4-49b8-b837-45be48c7e7be";
+        log.info("inside createPageRequestUsing");
+        String url = "https://api.dabas.com/DABASService/V2/article/gtin/" + gtinNumber + "/JSON?apikey=" + apiKey;
         Optional<String> response = sendApiRequest(url);
 
 
@@ -128,9 +133,10 @@ public class DabasDataService implements DataProvider {
 
     @Override
     public List<Search> fetchUpaginatedSearch(String searchParameter) {
+        log.info("inside fetchUpaginatedSearch:");
         List<Search> searchList = new ArrayList<>();
         String encodedSearchParameter = searchParameter.replace(" ", "%20");
-        String url = "https://api.dabas.com/DABASService/V2/articles/basesearchparameter/" + encodedSearchParameter + "/JSON?apikey=741ffd2b-3be4-49b8-b837-45be48c7e7be";
+        String url = "https://api.dabas.com/DABASService/V2/articles/basesearchparameter/" + encodedSearchParameter + "/JSON?apikey=" + apiKey;
         String jsonString;
 
         try {
