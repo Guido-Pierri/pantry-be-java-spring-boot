@@ -11,6 +11,7 @@ import com.guidopierri.pantrybe.permissions.Roles;
 import com.guidopierri.pantrybe.services.SpringSecurityUserDetailsService;
 import com.guidopierri.pantrybe.services.UserService;
 import com.guidopierri.pantrybe.utils.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,11 +44,13 @@ public class UserController {
         this.entityMapper = entityMapper;
     }
 
+    @Operation(summary = "Get all users")
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         return new ResponseEntity<>((userService.getUsers()), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get user by email")
     @GetMapping("email/{email}")
     public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -61,6 +64,7 @@ public class UserController {
                 HttpStatus.OK);
     }
 
+    @Operation(summary = "Login with credentials")
     @PostMapping("login/{email}")
     public ResponseEntity<?> login(@PathVariable String email, @RequestBody String password) {
         if (password == null) {
@@ -82,6 +86,7 @@ public class UserController {
                 HttpStatus.OK);
     }
 
+    @Operation(summary = "Check if email exists in the database")
     @PostMapping("/check-email")
     public ResponseEntity<Map<String, Boolean>> checkEmail(@RequestBody String token) {
         Jwt jwt = jwtUtil.jwtDecoder().decode(token);
@@ -101,44 +106,51 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/fetch-logged-in-user/{email}")
+    @Operation(summary = "Get logged in user")
+    @GetMapping("/get-logged-in-user/{email}")
     public ResponseEntity<UserResponse> getLoggedInUser(@PathVariable String email) {
-        var userDetails = userService.getByemail(email);
-        final String jwt = jwtUtil.generateToken(userDetails);
+        User user = userService.getByemail(email);
+        final String jwt = jwtUtil.generateToken(user);
 
-        UserResponse userResponse = new UserResponse(userDetails.getId(), userDetails.getFirstName(), userDetails.getLastName(), userDetails.getEmail(), userDetails.getImageUrl(), userDetails.getPassword(), userDetails.getRoles().name(), jwt);
+        UserResponse userResponse = new UserResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getImageUrl(), user.getPassword(), user.getRoles().name(), jwt);
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
+    @Operation(summary = "Get user by id")
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         return new ResponseEntity<>(entityMapper.userToUserDto(userService.getUserById(id)), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get user by username")
     @GetMapping("username/{username}")
     public ResponseEntity<UserDetails> getUserByUsername(@PathVariable String username) {
 
-        return new ResponseEntity<UserDetails>(userDetailsService.loadUserByUsername(username), HttpStatus.FOUND);
+        return new ResponseEntity<>(userDetailsService.loadUserByUsername(username), HttpStatus.FOUND);
     }
 
+    @Operation(summary = "Save a user")
     @PostMapping("/create")
-    public ResponseEntity<UserDto> createUser(@RequestBody CreateUserRequest user) {
+    public ResponseEntity<UserDto> saveUser(@RequestBody CreateUserRequest user) {
 
         return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Get user by email and password")
     @GetMapping("/user")
     public ResponseEntity<UserDto> getUser(@RequestBody CreateUserRequest user) {
 
         return new ResponseEntity<>(entityMapper.userToUserDto(userService.getUserByemailAndPassword(user.email(), user.password())), HttpStatus.OK);
     }
 
+    @Operation(summary = "Delete a user by id")
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAnyAuthority('admin:delete', 'user:delete')")
     public ResponseEntity<DeleteUserResponse> deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
     }
 
+    @Operation(summary = "Get all user roles")
     @GetMapping("/all-roles")
     public ResponseEntity<List<Roles>> getAllRoles() {
         List<Roles> roles = new ArrayList<>();
@@ -146,6 +158,7 @@ public class UserController {
         return new ResponseEntity<>(roles, HttpStatus.OK);
     }
 
+    @Operation(summary = "Update a user")
     @PutMapping("/update/{id}")
     @PreAuthorize("hasAnyAuthority('admin:write', 'user:write')")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody CreateUserRequest user) {
@@ -157,6 +170,7 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "Update user profile by id")
     @PutMapping("/update-user-profile/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> updateUserProfile(@PathVariable Long id, @RequestBody UpdateUserRequest user) {
@@ -168,8 +182,9 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "Check if token is valid")
     @GetMapping("/check-token")
-    public ResponseEntity<?> checkToken() {
+    public ResponseEntity<String> checkToken() {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
