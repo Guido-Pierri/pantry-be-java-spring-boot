@@ -3,6 +3,7 @@ package com.guidopierri.pantrybe.controllers;
 import com.guidopierri.pantrybe.dtos.responses.DabasItemResponse;
 import com.guidopierri.pantrybe.models.DabasItem;
 import com.guidopierri.pantrybe.services.DabasDataService;
+import com.guidopierri.pantrybe.services.DabasImportService;
 import com.guidopierri.pantrybe.services.DabasSearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
@@ -22,10 +23,12 @@ public class DabasController {
     private static final Logger log = LoggerFactory.getLogger(DabasController.class);
     private final DabasDataService dabasDataService;
     private final DabasSearchService dabasSearchService;
+    private final DabasImportService dabasImportService;
 
-    public DabasController(DabasDataService dabasDataService, DabasSearchService dabasSearchService) {
+    public DabasController(DabasDataService dabasDataService, DabasSearchService dabasSearchService, DabasImportService dabasImportService) {
         this.dabasDataService = dabasDataService;
         this.dabasSearchService = dabasSearchService;
+        this.dabasImportService = dabasImportService;
     }
 
     @Operation(summary = "Get a product by gtin number.")
@@ -61,7 +64,7 @@ public class DabasController {
     @Operation(summary = "Import all articles from DABAS API.")
     @GetMapping("/import")
     public ResponseEntity<List<DabasItemResponse>> importArticles() throws Exception {
-        return new ResponseEntity<>(dabasDataService.importArticlesGtin(), HttpStatus.OK);
+        return new ResponseEntity<>(dabasImportService.importArticlesGtin(), HttpStatus.OK);
     }
 
     @Operation(summary = "Sanitize all articles imported from DABAS API.")

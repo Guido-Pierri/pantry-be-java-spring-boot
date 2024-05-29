@@ -18,7 +18,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -26,7 +26,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -38,16 +37,33 @@ import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for handling operations related to Dabas data.
+ * This includes fetching data from the DABAS API, validating API responses,
+ * caching results, and interacting with the local database.
+ * <p>
+ * The class implements the DataProvider interface, which defines methods for fetching
+ * and searching for articles in the DABAS API.
+ * <p>
+ * It uses the DabasItemRepository for database operations, the EntityMapper for converting
+ * between DabasItem and DabasItemResponse objects, and the EntityManager for executing
+ * custom database queries.
+ * <p>
+ * The class is annotated with @Service, indicating that it is a Spring service component.
+ * It is also annotated with @Slf4j, which provides a logger for logging messages.
+ */
 @Service
+@Slf4j
 public class DabasDataService implements DataProvider {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(DabasDataService.class);
     private final ItemService itemService;
     private final DabasItemRepository dabasItemRepository;
     private final EntityMapper entityMapper;
     private final EntityManager entityManager;
     @Value("${api-key}")
     private String apiKey;
+    @Value("${dabas-api-url}")
+    private String dabasApiUrl;
 
     public DabasDataService(ItemService itemService, DabasItemRepository dabasItemRepository, EntityMapper entityMapper, EntityManager entityManager) {
         this.itemService = itemService;
@@ -56,16 +72,22 @@ public class DabasDataService implements DataProvider {
         this.entityManager = entityManager;
     }
 
-    private Pageable createPageRequestUsing(int page, int size) {
-        return PageRequest.of(page, size);
-    }
-
-
+    /**
+     * Fetches an article from the DABAS API using the provided GTIN number.
+     * The method is cacheable, meaning that Spring will cache the result of the method
+     * and, for subsequent calls with the same GTIN number, it will return the cached result
+     * instead of calling the method again.
+     *
+     * @param gtinNumber The GTIN number of the article to fetch.
+     * @return An Optional containing a DabasItemResponse if the article is found, or an empty Optional if not.
+     * @throws Exception If there is an error during the API request or the JSON processing.
+     * @Cacheable(value = "articles", key = "#gtinNumber") Annotation indicating that the result of the method
+     * should be cached. The cache name is "articles" and the key for storing the result in the cache is the GTIN number.
+     */
     @Cacheable(value = "articles", key = "#gtinNumber")
     @Override
     public Optional<DabasItemResponse> getArticle(String gtinNumber) throws Exception {
-        log.info("inside createPageRequestUsing");
-        String url = "https://api.dabas.com/DABASService/V2/article/gtin/" + gtinNumber + "/JSON?apikey=" + apiKey;
+        String url = dabasApiUrl + "article/gtin/" + gtinNumber + "/JSON?apikey=" + apiKey;
         Optional<String> response = sendApiRequest(url);
 
 
@@ -120,23 +142,44 @@ public class DabasDataService implements DataProvider {
 
     }
 
+    /**
+     * Validates the response from the DABAS API.
+     *
+     * @param response The response from the DABAS API as a String.
+     * @return A JsonNode object representing the JSON structure of the response.
+     * @throws JsonProcessingException If there is an error during the JSON processing.
+     *                                 <p>
+     *                                 This method checks if the response is null or empty, and if so, throws a DabasException.
+     *                                 If the response is valid, it converts the response into a JsonNode object using the Jackson library
+     *                                 and returns it.
+     */
     private JsonNode validateResponse(String response) throws JsonProcessingException {
         if (response == null || response.isEmpty()) {
-            throw new RuntimeException("Error processing SIBS data: Response is empty");
+            throw new DabasException("Error validating DABAS data");
         }
         JsonNode jsonNode = getObjectMapper().readTree(response);
-        if (jsonNode.isEmpty()) {
-            return jsonNode;
-        }
+        jsonNode.isEmpty();
         return jsonNode;
     }
 
+    /**
+     * Fetches a list of Search objects from the DABAS API using the provided search parameter.
+     * The search parameter is URL encoded and appended to the DABAS API URL.
+     *
+     * @param searchParameter The search parameter to use in the DABAS API request.
+     * @return A List of Search objects representing the search results from the DABAS API.
+     * @throws RuntimeException If there is an error during the API request or the JSON processing.
+     *                          <p>
+     *                          This method sends an API request to the DABAS API with the provided search parameter.
+     *                          If the API response contains "Not Found", it logs an error and returns an empty list.
+     *                          Otherwise, it converts the JSON response into a list of Search objects and returns it.
+     */
     @Override
-    public List<Search> fetchUpaginatedSearch(String searchParameter) {
+    public List<Search> getAllBaseArticleSearchResults(String searchParameter) {
         log.info("inside fetchUpaginatedSearch:");
         List<Search> searchList = new ArrayList<>();
         String encodedSearchParameter = searchParameter.replace(" ", "%20");
-        String url = "https://api.dabas.com/DABASService/V2/articles/basesearchparameter/" + encodedSearchParameter + "/JSON?apikey=" + apiKey;
+        String url = dabasApiUrl + "articles/basesearchparameter/" + encodedSearchParameter + "/JSON?apikey=" + apiKey;
         String jsonString;
 
         try {
@@ -146,10 +189,10 @@ public class DabasDataService implements DataProvider {
         }
         // Check for 404 error
         if (jsonString.contains("Not Found")) {
-            System.out.println("404 Error: Resource not found for search parameter: " + searchParameter);
+            log.error("404 Error: Resource not found for search parameter: {}", searchParameter);
             return searchList; // or handle it in another way based on your requirements
         }
-        System.out.println("jsonString:" + jsonString);
+        log.info("jsonString: {}", jsonString);
         try {
             return Arrays.stream(getObjectMapper().readValue(jsonString, Search[].class)).toList();
 
@@ -164,6 +207,18 @@ public class DabasDataService implements DataProvider {
         return objectMapper;
     }
 
+    /**
+     * Sends an HTTP request to the specified URL and returns the response body as a String.
+     *
+     * @param url The URL to send the request to.
+     * @return An Optional containing the response body as a String if the request was successful, or an empty Optional if the status code was 404.
+     * @throws IOException          If an I/O error occurs when sending or receiving.
+     * @throws InterruptedException If the operation is interrupted.
+     *                              <p>
+     *                              This method creates a new HttpClient and HttpRequest, sends the request, and records the time taken.
+     *                              If the status code of the response is 404, it logs an error and returns an empty Optional.
+     *                              Otherwise, it returns an Optional containing the response body as a String.
+     */
     Optional<String> sendApiRequest(String url) throws IOException, InterruptedException {
         long startTime = System.currentTimeMillis();
 
@@ -188,11 +243,26 @@ public class DabasDataService implements DataProvider {
         return response.body().describeConstable();
     }
 
+    /**
+     * Searches for articles in the DABAS API using the provided search parameter.
+     *
+     * @param searchParameter The search parameter to use in the DABAS API request.
+     * @return A List of DabasItemResponse objects representing the search results from the DABAS API.
+     * <p>
+     * This method first calls the fetchUpaginatedSearch method to get a list of Search objects from the DABAS API.
+     * It then converts this list into a Set of DabasItemResponse objects by calling the dtoSet method.
+     * Finally, it converts the Set back into a List and returns it.
+     */
     public List<DabasItemResponse> search(String searchParameter) {
-        List<Search> searchList = fetchUpaginatedSearch(searchParameter);
+        List<Search> searchList = getAllBaseArticleSearchResults(searchParameter);
         log.info("searchList: {}", searchList);
 
-        Set<DabasItemResponse> dtos = searchList.stream()
+        Set<DabasItemResponse> dtos = dtoSet(searchList);
+        return dtos.stream().toList();
+    }
+
+    private Set<DabasItemResponse> dtoSet(List<Search> searchList) {
+        return searchList.stream()
                 .map(search -> getArticleByGtin(search.getGtin()).orElse(null))
                 .filter(Objects::nonNull)
                 .map(item -> {
@@ -201,32 +271,46 @@ public class DabasDataService implements DataProvider {
 
                 })
                 .collect(Collectors.toSet());
-        return dtos.stream().toList();
     }
 
+    /**
+     * Searches for articles in the DABAS API using the provided search parameter and returns a page of results.
+     * The method is cacheable, meaning that Spring will cache the result of the method
+     * and, for subsequent calls with the same search parameter and page number, it will return the cached result
+     * instead of calling the method again.
+     *
+     * @param searchParameter The search parameter to use in the DABAS API request.
+     * @param page            The page number to fetch.
+     * @param size            The number of results per page.
+     * @return A Page of DabasItemResponse objects representing the search results from the DABAS API.
+     * @Cacheable(value = "search", key = "{#searchParameter, #page}") Annotation indicating that the result of the method
+     * should be cached. The cache name is "search" and the key for storing the result in the cache is a combination of the search parameter and the page number.
+     */
     @Override
     @Cacheable(value = "search", key = "{#searchParameter, #page}")
     public Page<DabasItemResponse> searchToPageable(String searchParameter, int page, int size) {
-        Pageable pageRequest = createPageRequestUsing(page, size);
+        Pageable pageRequest = PageRequest.of(page, size);
 
-        List<Search> searchList = fetchUpaginatedSearch(searchParameter);
+        List<Search> searchList = getAllBaseArticleSearchResults(searchParameter);
         log.info("searchList: {}", searchList);
         int pageSize = pageRequest.getPageSize();
         int start = (int) pageRequest.getOffset();
         int end = Math.min((start + pageSize), searchList.size());
-        Set<DabasItemResponse> dtos = searchList.stream()
-                .map(search -> getArticleByGtin(search.getGtin()).orElse(null))
-                .filter(Objects::nonNull)
-                .map(item -> {
-                    log.info("item: {}", item);
-                    return new DabasItemResponse(item.gtin(), item.name(), item.brand(), item.image(), item.category(), item.size(), item.ingredients(), item.productClassifications(), item.bruteWeight(), item.drainedWeight());
-
-                })
-                .collect(Collectors.toSet());
+        var dtos = dtoSet(searchList);
         List<DabasItemResponse> pageContent = dtos.stream().toList().subList(start, end);
         return new PageImpl<>(pageContent, pageRequest, dtos.size());
     }
 
+    /**
+     * Fetches an article from the local database using the provided GTIN number.
+     *
+     * @param gtin The GTIN number of the article to fetch.
+     * @return An Optional containing a DabasItemResponse if the article is found, or an empty Optional if not.
+     * <p>
+     * This method queries the local database for an article with the provided GTIN number.
+     * If the article is found, it is converted to a DabasItemResponse and returned.
+     * If the article is not found, an empty Optional is returned.
+     */
     private Optional<DabasItemResponse> getArticleByGtin(String gtin) {
         log.info("gtin: {}", gtin);
         DabasItem dabasItem = dabasItemRepository.findDabasItemByGtin(gtin).orElse(null);
@@ -236,6 +320,15 @@ public class DabasDataService implements DataProvider {
         return Optional.of(entityMapper.dabasItemToDabasItemResponse(dabasItem));
     }
 
+    /**
+     * Sanitizes the local database by removing duplicate articles.
+     *
+     * @return A List of all DabasItem objects in the local database after the sanitization.
+     * <p>
+     * This method fetches all articles from the local database and groups them by GTIN number.
+     * If any GTIN number has more than one associated article, all but one of these articles are deleted.
+     * The method then returns a list of all remaining articles in the local database.
+     */
     public List<DabasItem> sanitize() {
 
         List<DabasItem> allItems = dabasItemRepository.findAll();
@@ -261,74 +354,79 @@ public class DabasDataService implements DataProvider {
         return allItems;
     }
 
-    public void saveAll(List<DabasItem> users) {
-        dabasItemRepository.saveAllAndFlush(users);
+    /**
+     * Saves a list of DabasItem objects to the database.
+     *
+     * @param items The list of DabasItem objects to save.
+     *              <p>
+     *              This method uses the DabasItemRepository to save the provided list of DabasItem objects to the database.
+     *              It then flushes the persistence context, ensuring that any pending changes are actually written to the database.
+     */
+    public void saveAll(List<DabasItem> items) {
+        dabasItemRepository.saveAllAndFlush(items);
     }
 
+    /**
+     * Seeds the database with articles.
+     * <p>
+     * This method reads a JSON file containing a list of DabasItem objects, converts the JSON into a list of DabasItem objects,
+     * and then saves this list to the database using the saveAll method. If an error occurs during this process, it logs the error message.
+     */
     public void seedArticles() {
+        log.info("Seeding articles");
         ObjectMapper mapper = new ObjectMapper();
         TypeReference<List<DabasItem>> typeReference = new TypeReference<>() {
         };
         InputStream inputStream = TypeReference.class.getResourceAsStream("/dabas-items/dabasItems.json");
         try {
             List<DabasItem> items = mapper.readValue(inputStream, typeReference);
-            log.info("Nr of items seeded: {}", items.size());
             saveAll(items);
-            log.info("Items Saved!");
+            log.info("{} Items seeded!", items.size());
         } catch (IOException e) {
-            log.info("Unable to save users: {}", e.getMessage());
+            log.info("Unable to seed articles: {}", e.getMessage());
         }
     }
 
-    @Scheduled(cron = "0 2 * * 0") // run every week at 2:00 AM
-    public List<DabasItemResponse> importArticlesGtin() throws Exception {
-        List<Map<String, String>> articlesMap = new ArrayList<>();
-        String apikey = "741ffd2b-3be4-49b8-b837-45be48c7e7be";
-        String url = "https://api.dabas.com/DABASService/V2/articles/JSON?apikey=" + apikey;
-        String jsonString;
-
-        jsonString = (sendApiRequest(url).orElseThrow(() ->
-                new DabasException("Error: No response from DABAS")));
-
-        log.info("jsonString: {}", jsonString);
-        int articlesCount = 0;
-        for (Map map : getObjectMapper().readValue(jsonString, Map[].class)) {
-            Map<String, String> article = new HashMap<>();
-            article.put("GTIN", map.get("GTIN").toString());
-            articlesMap.add(article);
-            articlesCount++;
-        }
-        log.info("Found {} Articles in DABAS ", articlesCount);
-
-        int batchSize = 100; // Define your batch size here
-        List<DabasItemResponse> articles = new ArrayList<>();
-        for (int i = 0; i < articlesMap.size(); i += batchSize) {
-            int end = Math.min(i + batchSize, articlesMap.size());
-            List<Map<String, String>> batch = articlesMap.subList(i, end);
-
-            for (Map<String, String> article : batch) {
-                Optional<DabasItemResponse> response = getArticle(article.get("GTIN"));
-                if (response.isPresent()) {
-                    dabasItemRepository.saveAndFlush(entityMapper.dabasItemResponseToDabasItem(response.get()));
-                    articles.add(response.get());
-                    log.info("Imported article: {}", response.get().name());
-                    log.info("article nr: {} from :{}", articles.size(), articlesCount);
-                }
-            }
-        }
-        return articles;
-    }
-
+    /**
+     * Fetches a list of DabasItemResponse objects from the database using the provided list of IDs.
+     *
+     * @param dabasItemsIds The list of IDs to fetch.
+     * @return A list of DabasItemResponse objects.
+     * <p>
+     * This method uses the DabasItemRepository to fetch a list of DabasItem objects from the database using the provided list of IDs.
+     * It then converts this list of DabasItem objects into a list of DabasItemResponse objects and returns it.
+     */
     private List<DabasItemResponse> getDabasItemsByIds(List<Long> dabasItemsIds) {
         return entityMapper.convertListOfEmployeeToListOfEmployeeResponse(dabasItemRepository.findAllById(dabasItemsIds));
     }
 
+    /**
+     * Searches for articles in the database using the provided search parameters and pagination information.
+     *
+     * @param search   The search parameters to use.
+     * @param pageable The pagination information to use.
+     * @return A list of DabasItemResponse objects representing the search results.
+     * <p>
+     * This method uses the DabasItemSearchSpecification to create a specification based on the provided search parameters.
+     * It then uses this specification to fetch a page of IDs from the database, converts this page of IDs into a list of IDs,
+     * and fetches a list of DabasItemResponse objects from the database using this list of IDs. It then returns this list of DabasItemResponse objects.
+     */
     public List<DabasItemResponse> search(SearchParams search, Pageable pageable) {
         Page<Long> page = findIdsBySpecification(new DabasItemSearchSpecification(search), pageable, DabasItem.class);
         return getDabasItemsByIds(page.getContent());
     }
 
-
+    /**
+     * Fetches a page of IDs from the database using the provided specification and pagination information.
+     *
+     * @param specification The specification to use.
+     * @param pageable      The pagination information to use.
+     * @param clazz         The class of the objects to fetch.
+     * @return A page of IDs.
+     * <p>
+     * This method uses the provided specification to create a CriteriaQuery for fetching a page of IDs from the database.
+     * It then executes this query and returns the result as a page of IDs.
+     */
     public <T> Page<Long> findIdsBySpecification(Specification<T> specification,
                                                  Pageable pageable, Class<T> clazz) {
 
@@ -353,22 +451,26 @@ public class DabasDataService implements DataProvider {
         return new PageImpl<>(result.getResultList(), pageable, totalElements);
     }
 
-    public void checkAndImportArticles() throws Exception {
-        if (dabasItemRepository.count() == 0) {
-            importArticlesGtin();
-        }
-    }
-
+    /**
+     * Checks if the database is empty, and if so, seeds it with articles.
+     * <p>
+     * This method checks if the database is empty by counting the number of DabasItem objects in it.
+     * If the count is zero, it calls the seedArticles method to seed the database with articles.
+     */
     public void checkAndSeedArticles() {
         if (dabasItemRepository.count() == 0) {
             seedArticles();
         }
     }
 
+    /**
+     * Initializes the service by checking and seeding the database with articles.
+     * <p>
+     * This method is annotated with @PostConstruct, meaning it is automatically called by Spring after the service is constructed and before it is used.
+     * It calls the checkAndSeedArticles method to check if the database is empty and seed it with articles if necessary.
+     */
     @PostConstruct
     public void init() {
         checkAndSeedArticles();
-        //checkAndImportArticles();
-
     }
 }
