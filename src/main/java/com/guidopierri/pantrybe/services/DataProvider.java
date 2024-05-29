@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DataProvider {
+
     Optional<DabasItemResponse> getArticle(String gtin) throws Exception;
 
-    List<Search> fetchUpaginatedSearch(String searchParameter);
+    List<Search> getAllBaseArticleSearchResults(String searchParameter);
 
     Page<DabasItemResponse> searchToPageable(String searchParameter, int page, int size) throws Exception;
 }
