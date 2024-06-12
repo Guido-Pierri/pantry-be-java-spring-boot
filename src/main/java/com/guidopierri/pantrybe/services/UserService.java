@@ -7,6 +7,7 @@ import com.guidopierri.pantrybe.dtos.requests.UpdateUserRequest;
 import com.guidopierri.pantrybe.dtos.responses.DeleteUserResponse;
 import com.guidopierri.pantrybe.dtos.responses.UserResponse;
 import com.guidopierri.pantrybe.exceptions.UserNotFoundException;
+import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.models.User;
 import com.guidopierri.pantrybe.permissions.Roles;
 import com.guidopierri.pantrybe.repositories.ItemRepository;
@@ -59,36 +60,51 @@ public class UserService implements UserDetailsService {
     }
 
     @CacheEvict(value = "users", allEntries = true)
+    @Transactional
     public UserDto createUser(CreateUserRequest user) {
         logger.info("Creating user");
-        logger.info(user.toString());
         Optional<User> userFromDatabase = userRepository.findUserByEmail(user.email());
         if (userFromDatabase.isEmpty()) {
+            // Save the User first
+            User newUser = saveUser(user);
+            // Then create a new Pantry and associate it with the User
+            Pantry pantry = new Pantry();
+            pantry.setUser(newUser);
 
-            if (user.id() == 0) {
-                User newUser = new User();
-                newUser.setFirstName((user.firstName()));
-                newUser.setLastName(user.lastName());
-                newUser.setEmail(user.email());
-                if (user.authProvider().equals("google")) {
-                    newUser.setPassword(null);
-                } else {
-                    logger.info("Password before encoding: {}", user.password());
-                    newUser.setPassword(passwordEncoder.encode(user.password()));
-                    logger.info("Password after encoding: {}", newUser.getPassword());
+            // Save the pantry and get the saved entity
+            Pantry savedPantry = pantryRepository.save(pantry);
+            newUser.setPantry(savedPantry);
 
-                }
-                newUser.setUsername(user.email());
-                newUser.setImageUrl(user.imageUrl());
-                newUser.setAccountNonExpired(true);
-                newUser.setAccountNonLocked(true);
-                newUser.setCredentialsNonExpired(true);
-                newUser.setEnabled(true);
-                newUser.setAuthProvider(user.authProvider());
-                newUser.setRoles(Roles.valueOf(user.roles()));
-                userRepository.save(newUser);
-                return entityMapper.userToUserDto(newUser);
+            // Update the User with the associated Pantry
+            return entityMapper.userToUserDto(userRepository.save(newUser));
+        }
+        return null;
+    }
+
+    public User saveUser(CreateUserRequest user) {
+
+        if (user.id() == 0) {
+            User newUser = new User();
+            newUser.setFirstName((user.firstName()));
+            newUser.setLastName(user.lastName());
+            newUser.setEmail(user.email());
+            if (user.authProvider().equals("google")) {
+                newUser.setPassword(null);
+            } else {
+                newUser.setPassword(passwordEncoder.encode(user.password()));
+
             }
+            newUser.setUsername(user.email());
+            newUser.setImageUrl(user.imageUrl());
+            newUser.setAccountNonExpired(true);
+            newUser.setAccountNonLocked(true);
+            newUser.setCredentialsNonExpired(true);
+            newUser.setEnabled(true);
+            newUser.setAuthProvider(user.authProvider());
+            newUser.setRoles(Roles.USER);
+            logger.info("User created successfully");
+            return userRepository.save(newUser);
+
         }
         return null;
     }
