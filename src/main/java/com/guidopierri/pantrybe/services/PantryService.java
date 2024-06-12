@@ -58,10 +58,16 @@ public class PantryService {
 
     public Pantry getPantriesByUserId(long id) {
         User user = userService.getUserById(id);
-        System.out.println("user" + user);
-        long pantryId = user.getPantry().getId();
-        System.out.println("pantryId" + pantryId);
-        return pantryRepository.findById(pantryId).orElse(null);
+        logger.info("user {}", user);
+        Pantry pantry = user.getPantry();
+        if (pantry != null) {
+            long pantryId = pantry.getId();
+            logger.info("pantryId {}", pantryId);
+            return pantryRepository.findById(pantryId).orElse(null);
+        } else {
+            logger.warn("User with id {} does not have an associated pantry", id);
+            return null;
+        }
     }
 
     public List<ItemDto> convertItemsToDto(List<Item> items) {
