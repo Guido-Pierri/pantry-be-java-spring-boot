@@ -1,7 +1,6 @@
 package com.guidopierri.pantrybe.services;
 
 import com.guidopierri.pantrybe.config.EntityMapper;
-import com.guidopierri.pantrybe.dtos.UserDto;
 import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.dtos.requests.UpdateUserRequest;
 import com.guidopierri.pantrybe.dtos.responses.DeleteUserResponse;
@@ -61,7 +60,7 @@ public class UserService implements UserDetailsService {
 
     @CacheEvict(value = "users", allEntries = true)
     @Transactional
-    public UserDto createUser(CreateUserRequest user) {
+    public User createUser(CreateUserRequest user) {
         logger.info("Creating user");
         Optional<User> userFromDatabase = userRepository.findUserByEmail(user.email());
         if (userFromDatabase.isEmpty()) {
@@ -70,28 +69,36 @@ public class UserService implements UserDetailsService {
             // Then create a new Pantry and associate it with the User
             Pantry pantry = new Pantry();
             pantry.setUser(newUser);
-
             // Save the pantry and get the saved entity
             Pantry savedPantry = pantryRepository.save(pantry);
             newUser.setPantry(savedPantry);
-
+            logger.info("User created successfully: {}", newUser);
             // Update the User with the associated Pantry
-            return entityMapper.userToUserDto(userRepository.save(newUser));
+            User savedUser = userRepository.save(newUser);
+            logger.info("Saved user: {}", savedUser);
+
+            return savedUser;
         }
         return null;
     }
 
-    public User saveUser(CreateUserRequest user) {
+    private User saveUser(CreateUserRequest user) {
 
         if (user.id() == 0) {
             User newUser = new User();
             newUser.setFirstName((user.firstName()));
             newUser.setLastName(user.lastName());
             newUser.setEmail(user.email());
+            logger.info("User auth provider: {}", user.authProvider());
             if (user.authProvider().equals("google")) {
+                logger.info("Google user, setting password to null");
                 newUser.setPassword(null);
             } else {
+                logger.info("Not a google user, setting password");
+                logger.info("Password user: {}", user.password());
                 newUser.setPassword(passwordEncoder.encode(user.password()));
+                logger.info("Password newUser: {}", newUser.getPassword());
+
 
             }
             newUser.setUsername(user.email());
@@ -143,10 +150,12 @@ public class UserService implements UserDetailsService {
     @Transactional
     @CacheEvict(value = "users", allEntries = true)
     public ResponseEntity<DeleteUserResponse> deleteUser(Long userId) {
+        logger.info("Deleting user");
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         itemRepository.deleteByPantryId(user.getPantry().getId());
         pantryRepository.deleteByUser(user);
         userRepository.delete(user);
+        logger.info("User deleted successfully");
         return new ResponseEntity<>(new DeleteUserResponse("User deleted successfully"), HttpStatus.OK);
     }
 

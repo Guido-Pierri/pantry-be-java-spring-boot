@@ -132,8 +132,8 @@ public class UserController {
     @Operation(summary = "Save a user")
     @PostMapping("/create")
     public ResponseEntity<UserDto> saveUser(@RequestBody CreateUserRequest user) {
-
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+        UserDto userDto = entityMapper.userToUserDto(userService.createUser(user));
+        return new ResponseEntity<>(userDto, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Get user by email and password")
