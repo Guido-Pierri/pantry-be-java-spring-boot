@@ -78,9 +78,17 @@ public class User implements UserDetails {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public String getUsername() {
         return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override
@@ -88,9 +96,17 @@ public class User implements UserDetails {
         return isAccountNonExpired;
     }
 
+    public void setAccountNonExpired(boolean accountNonExpired) {
+        isAccountNonExpired = accountNonExpired;
+    }
+
     @Override
     public boolean isAccountNonLocked() {
         return isAccountNonLocked;
+    }
+
+    public void setAccountNonLocked(boolean accountNonLocked) {
+        isAccountNonLocked = accountNonLocked;
     }
 
     @Override
@@ -98,61 +114,37 @@ public class User implements UserDetails {
         return isCredentialsNonExpired;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return isEnabled;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setAccountNonExpired(boolean accountNonExpired) {
-        isAccountNonExpired = accountNonExpired;
-    }
-
-    public void setAccountNonLocked(boolean accountNonLocked) {
-        isAccountNonLocked = accountNonLocked;
-    }
-
     public void setCredentialsNonExpired(boolean credentialsNonExpired) {
         isCredentialsNonExpired = credentialsNonExpired;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getEmail(String email) {
-        return email;
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
     }
 
     public void setEnabled(boolean enabled) {
         isEnabled = enabled;
     }
 
-    public void setPantry(Pantry pantry) {
-        this.pantry = pantry;
+    public String getEmail(String email) {
+        return email;
     }
 
     public String getFirstName() {
         return firstName;
     }
 
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
     public String getLastName() {
         return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Roles getRoles() {
@@ -167,8 +159,16 @@ public class User implements UserDetails {
         return pantry;
     }
 
+    public void setPantry(Pantry pantry) {
+        this.pantry = pantry;
+    }
+
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getAuthProvider() {
