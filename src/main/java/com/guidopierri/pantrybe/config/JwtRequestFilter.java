@@ -1,5 +1,6 @@
 package com.guidopierri.pantrybe.config;
 
+import com.guidopierri.pantrybe.models.User;
 import com.guidopierri.pantrybe.services.UserService;
 import com.guidopierri.pantrybe.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -54,16 +55,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null && tokenProvider.equals("custom")) {
-                UserDetails userDetails = userService.loadUserByUsername(username);
-                Boolean isTokenValid = jwtUtil.validateTokenWithKey(token, userDetails);
+                User user = userService.getUserByEmail(username);
+                Boolean isTokenValid = jwtUtil.validateTokenWithKey(token, user);
                 if (Boolean.TRUE.equals(isTokenValid)) {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
+                            user, null, user.getAuthorities());
                     usernamePasswordAuthenticationToken
                             .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                 }
             } else if (username != null && SecurityContextHolder.getContext().getAuthentication() == null && tokenProvider.equals("Oauth2")) {
+                //FIXME: replace with loadUserByEmail
                 UserDetails userDetails = userService.loadUserByUsername(username);
 
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
