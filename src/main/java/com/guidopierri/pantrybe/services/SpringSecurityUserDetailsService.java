@@ -23,7 +23,7 @@ public class SpringSecurityUserDetailsService implements UserDetailsService {
 
         // TODO - What if we do not FIND user?
 
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
 }

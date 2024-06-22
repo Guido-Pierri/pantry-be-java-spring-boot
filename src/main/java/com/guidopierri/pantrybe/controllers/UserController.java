@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -50,36 +49,21 @@ public class UserController {
         return new ResponseEntity<>((userService.getUsers()), HttpStatus.OK);
     }
 
-    @Operation(summary = "Get user by email")
-    @GetMapping("email/{email}")
-    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap<String, String>().put("message", "User not found"));
-        }
-        User user = userService.getUserByemailAndPassword(email, userDetails.getPassword());
-        final String jwt = jwtUtil.generateToken(userDetails);
-
-        return new ResponseEntity<>(new UserResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getImageUrl(), user.getPassword(), user.getRoles().name(), jwt),
-                HttpStatus.OK);
-    }
-
     @Operation(summary = "Login with credentials")
     @PostMapping("login/{email}")
     public ResponseEntity<?> login(@PathVariable String email, @RequestBody String password) {
         if (password == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<String, String>().put("message", "Password is required"));
         }
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-        if (userDetails == null) {
+        final User user = userService.getUserByEmail(email);
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap<String, String>().put("message", "User not found"));
         }
-        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<String, String>().put("message", "Invalid password"));
         }
-        User user = userService.getUserByemailAndPassword(email, userDetails.getPassword());
 
-        final String jwt = jwtUtil.generateToken(userDetails);
+        final String jwt = jwtUtil.generateToken(user);
 
         logger.info("Login successful");
         return new ResponseEntity<>(new UserResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getImageUrl(), user.getPassword(), user.getRoles().name(), jwt),
@@ -109,7 +93,7 @@ public class UserController {
     @Operation(summary = "Get logged in user")
     @GetMapping("/get-logged-in-user/{email}")
     public ResponseEntity<UserResponse> getLoggedInUser(@PathVariable String email) {
-        User user = userService.getByemail(email);
+        User user = userService.getUserByEmail(email);
         final String jwt = jwtUtil.generateToken(user);
 
         UserResponse userResponse = new UserResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getImageUrl(), user.getPassword(), user.getRoles().name(), jwt);
@@ -122,32 +106,18 @@ public class UserController {
         return new ResponseEntity<>(entityMapper.userToUserDto(userService.getUserById(id)), HttpStatus.OK);
     }
 
-    @Operation(summary = "Get user by username")
-    @GetMapping("username/{username}")
-    public ResponseEntity<UserDetails> getUserByUsername(@PathVariable String username) {
-
-        return new ResponseEntity<>(userDetailsService.loadUserByUsername(username), HttpStatus.FOUND);
-    }
-
     @Operation(summary = "Save a user")
     @PostMapping("/create")
     public ResponseEntity<UserDto> saveUser(@RequestBody CreateUserRequest user) {
-
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
-    }
-
-    @Operation(summary = "Get user by email and password")
-    @GetMapping("/user")
-    public ResponseEntity<UserDto> getUser(@RequestBody CreateUserRequest user) {
-
-        return new ResponseEntity<>(entityMapper.userToUserDto(userService.getUserByemailAndPassword(user.email(), user.password())), HttpStatus.OK);
+        UserDto userDto = entityMapper.userToUserDto(userService.createUser(user));
+        return new ResponseEntity<>(userDto, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a user by id")
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAnyAuthority('admin:delete', 'user:delete')")
     public ResponseEntity<DeleteUserResponse> deleteUser(@PathVariable Long id) {
-        return userService.deleteUser(id);
+        return userService.deleteUserById(id);
     }
 
     @Operation(summary = "Get all user roles")
@@ -162,7 +132,7 @@ public class UserController {
     @PutMapping("/update/{id}")
     @PreAuthorize("hasAnyAuthority('admin:write', 'user:write')")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody CreateUserRequest user) {
-        UserResponse response = userService.updateUser(id, user);
+        UserResponse response = entityMapper.userToUserResponse(userService.updateUser(id, user));
         if (response == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -174,7 +144,7 @@ public class UserController {
     @PutMapping("/update-user-profile/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> updateUserProfile(@PathVariable Long id, @RequestBody UpdateUserRequest user) {
-        UserResponse response = userService.updateUserProfile(id, user);
+        UserResponse response = entityMapper.userToUserResponse(userService.updateUserProfile(id, user));
         if (response == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 

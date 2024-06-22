@@ -1,11 +1,9 @@
 package com.guidopierri.pantrybe.services;
 
 import com.guidopierri.pantrybe.config.EntityMapper;
-import com.guidopierri.pantrybe.dtos.UserDto;
 import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.dtos.requests.UpdateUserRequest;
 import com.guidopierri.pantrybe.dtos.responses.DeleteUserResponse;
-import com.guidopierri.pantrybe.dtos.responses.UserResponse;
 import com.guidopierri.pantrybe.exceptions.UserNotFoundException;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.models.User;
@@ -13,7 +11,6 @@ import com.guidopierri.pantrybe.permissions.Roles;
 import com.guidopierri.pantrybe.repositories.ItemRepository;
 import com.guidopierri.pantrybe.repositories.PantryRepository;
 import com.guidopierri.pantrybe.repositories.UserRepository;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -25,9 +22,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -37,7 +34,6 @@ public class UserService implements UserDetailsService {
     private final PantryRepository pantryRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final ItemRepository itemRepository;
-
     Logger logger = org.slf4j.LoggerFactory.getLogger(UserService.class);
 
     @Autowired
@@ -61,7 +57,7 @@ public class UserService implements UserDetailsService {
 
     @CacheEvict(value = "users", allEntries = true)
     @Transactional
-    public UserDto createUser(CreateUserRequest user) {
+    public User createUser(CreateUserRequest user) {
         logger.info("Creating user");
         Optional<User> userFromDatabase = userRepository.findUserByEmail(user.email());
         if (userFromDatabase.isEmpty()) {
@@ -70,28 +66,41 @@ public class UserService implements UserDetailsService {
             // Then create a new Pantry and associate it with the User
             Pantry pantry = new Pantry();
             pantry.setUser(newUser);
-
+            logger.info("User pantry: {}", pantry);
             // Save the pantry and get the saved entity
             Pantry savedPantry = pantryRepository.save(pantry);
+            logger.info("Pantry created successfully: {}", savedPantry);
+            assert newUser != null;
             newUser.setPantry(savedPantry);
-
+            logger.info("User created successfully: {}", newUser);
+            logger.info("User pantry: {}", newUser.getPantry());
             // Update the User with the associated Pantry
-            return entityMapper.userToUserDto(userRepository.save(newUser));
+            User savedUser = userRepository.saveAndFlush(newUser);
+
+            logger.info("Saved user: {}", savedUser);
+
+            return savedUser;
         }
         return null;
     }
 
-    public User saveUser(CreateUserRequest user) {
+    private User saveUser(CreateUserRequest user) {
 
         if (user.id() == 0) {
             User newUser = new User();
             newUser.setFirstName((user.firstName()));
             newUser.setLastName(user.lastName());
             newUser.setEmail(user.email());
+            logger.info("User auth provider: {}", user.authProvider());
             if (user.authProvider().equals("google")) {
+                logger.info("Google user, setting password to null");
                 newUser.setPassword(null);
             } else {
+                logger.info("Not a google user, setting password");
+                logger.info("Password user: {}", user.password());
                 newUser.setPassword(passwordEncoder.encode(user.password()));
+                logger.info("Password newUser: {}", newUser.getPassword());
+
 
             }
             newUser.setUsername(user.email());
@@ -110,44 +119,48 @@ public class UserService implements UserDetailsService {
     }
 
     @Cacheable(value = "users", key = "#email")
-    public ResponseEntity<UserResponse> getUserByEmail(String email) {
-        Optional<User> user = userRepository.findUserByEmail(email);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(entityMapper.userToUserResponse(user.orElse(null)), HttpStatus.OK);
-
-
-    }
-
-    @Cacheable(value = "users", key = "#email")
-    public User getByemail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.findUserByEmail(email).orElse(null);
-    }
-
-    @Cacheable(value = "users", key = "#email")
-    public User getUserByemailAndPassword(String email, String password) {
-        return userRepository.findUserByEmailAndPassword(email, password).orElse(null);
     }
 
     @Override
     @Cacheable(value = "users", key = "#username")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
-        }
-        return user;
+        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    }
+
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
     }
 
     @Transactional
-    @CacheEvict(value = "users", allEntries = true)
-    public ResponseEntity<DeleteUserResponse> deleteUser(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        itemRepository.deleteByPantryId(user.getPantry().getId());
-        pantryRepository.deleteByUser(user);
+    public ResponseEntity<DeleteUserResponse> deleteUser(User user) {
+        logger.info("Deleting user");
+        logger.info("User found: {}", user);
+        if (user.getPantry() != null) {
+            deleteItemsByPantryId(user.getPantry().getId());
+            deletePantryByUser(user);
+        }
         userRepository.delete(user);
+        logger.info("User deleted successfully");
         return new ResponseEntity<>(new DeleteUserResponse("User deleted successfully"), HttpStatus.OK);
+    }
+
+    @Transactional
+    public void deletePantryByUser(User user) {
+        pantryRepository.deleteByUser(user);
+
+    }
+
+    @Transactional
+    void deleteItemsByPantryId(Long pantryId) {
+        itemRepository.deleteByPantryId(pantryId);
+    }
+
+    @CacheEvict(value = "users", allEntries = true)
+    public ResponseEntity<DeleteUserResponse> deleteUserById(Long userId) {
+        User user = findUserById(userId);
+        return deleteUser(user);
     }
 
     public boolean checkEmail(String email) {
@@ -155,36 +168,38 @@ public class UserService implements UserDetailsService {
     }
 
     @CacheEvict(value = "users", key = "#id")
-    public UserResponse updateUser(Long id, CreateUserRequest user) {
+    @Transactional
+    public User updateUser(Long id, CreateUserRequest user) {
+        logger.info("Updating user with id: {}", id);
         User userToUpdate = userRepository.findById(id).orElse(null);
-        if (!Objects.equals(user.roles(), Roles.USER.toString())) {
-            return null;
+        if (userToUpdate == null) {
+            throw new UserNotFoundException(id);
         }
-        if (userToUpdate != null) {
-            userToUpdate.setFirstName(user.firstName());
-            userToUpdate.setLastName(user.lastName());
-            userToUpdate.setEmail(user.email());
-            userToUpdate.setImageUrl(user.imageUrl());
-            //userToUpdate.setPassword(user.password());
-            userToUpdate.setRoles(Roles.valueOf(user.roles()));
-            userRepository.save(userToUpdate);
-            return entityMapper.userToUserResponse(userToUpdate);
-        }
-        return null;
+
+        userToUpdate.setFirstName(user.firstName());
+        userToUpdate.setLastName(user.lastName());
+        userToUpdate.setEmail(user.email());
+        userToUpdate.setRoles(Roles.valueOf(user.roles()));
+        userRepository.saveAndFlush(userToUpdate);
+        logger.info("User with id {} updated successfully", id);
+        return (userToUpdate);
+
     }
 
     @CacheEvict(value = "users", allEntries = true)
-    public UserResponse updateUserProfile(Long id, UpdateUserRequest user) {
+    @Transactional
+    public User updateUserProfile(Long id, UpdateUserRequest user) {
         User userToUpdate = userRepository.findById(id).orElse(null);
 
-        if (userToUpdate != null) {
-            userToUpdate.setFirstName(user.firstName());
-            userToUpdate.setLastName(user.lastName());
-            userToUpdate.setEmail(user.email());
-            userRepository.save(userToUpdate);
-            return entityMapper.userToUserResponse(userToUpdate);
+        if (userToUpdate == null) {
+            return null;
         }
-        return null;
+
+        userToUpdate.setFirstName(user.firstName());
+        userToUpdate.setLastName(user.lastName());
+        userToUpdate.setEmail(user.email());
+        userRepository.save(userToUpdate);
+        return userToUpdate;
     }
 }
 

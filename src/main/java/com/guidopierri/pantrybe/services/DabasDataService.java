@@ -19,8 +19,11 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -64,12 +67,20 @@ public class DabasDataService implements DataProvider {
     private String apiKey;
     @Value("${dabas-api-url}")
     private String dabasApiUrl;
+    @Autowired
+    private Environment env;
 
     public DabasDataService(ItemService itemService, DabasItemRepository dabasItemRepository, EntityMapper entityMapper, EntityManager entityManager) {
         this.itemService = itemService;
         this.dabasItemRepository = dabasItemRepository;
         this.entityMapper = entityMapper;
         this.entityManager = entityManager;
+    }
+
+    private static ObjectMapper getObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper;
     }
 
     /**
@@ -199,12 +210,6 @@ public class DabasDataService implements DataProvider {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static ObjectMapper getObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper;
     }
 
     /**
@@ -457,6 +462,7 @@ public class DabasDataService implements DataProvider {
      * This method checks if the database is empty by counting the number of DabasItem objects in it.
      * If the count is zero, it calls the seedArticles method to seed the database with articles.
      */
+    @Profile("!test")
     public void checkAndSeedArticles() {
         if (dabasItemRepository.count() == 0) {
             seedArticles();
@@ -470,7 +476,13 @@ public class DabasDataService implements DataProvider {
      * It calls the checkAndSeedArticles method to check if the database is empty and seed it with articles if necessary.
      */
     @PostConstruct
+    @Profile("!test")
     public void init() {
-        checkAndSeedArticles();
+        String[] activeProfiles = env.getActiveProfiles();
+        boolean isTestProfileActive = Arrays.asList(activeProfiles).contains("test");
+        if (!isTestProfileActive) {
+            checkAndSeedArticles();
+        }
+
     }
 }
