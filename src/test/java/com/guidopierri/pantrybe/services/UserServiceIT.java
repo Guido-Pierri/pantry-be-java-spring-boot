@@ -3,6 +3,8 @@ package com.guidopierri.pantrybe.services;
 import com.guidopierri.pantrybe.config.EntityMapper;
 import com.guidopierri.pantrybe.dtos.UserDto;
 import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
+import com.guidopierri.pantrybe.dtos.requests.UpdateUserRequest;
+import com.guidopierri.pantrybe.exceptions.UserNotFoundException;
 import com.guidopierri.pantrybe.models.User;
 import com.guidopierri.pantrybe.permissions.Roles;
 import com.guidopierri.pantrybe.repositories.ItemRepository;
@@ -32,7 +34,7 @@ public class UserServiceIT {
     @Autowired
     ItemRepository itemRepository;
     User user = new User();
-    UserDto userDto = new UserDto(0, "test", "test", "testuser@gmail.com", "test");
+    UserDto userDto = new UserDto(0, "test", "test", "testuser@gmail.com", "test", Roles.USER.name());
     CreateUserRequest createUserRequest = new CreateUserRequest(0, "test", "test", "testuser@gmail.com", "test", "test", Roles.USER.name(), "google");
     @MockBean
     private EntityMapper entityMapper;
@@ -168,5 +170,68 @@ public class UserServiceIT {
         assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername("xxx@xxx.xxx"));
     }
 
+    @Test
+    @DisplayName("Check email")
+    void testCheckEmail() {
+        UserService userService = new UserService(userRepository, entityMapper, pantryRepository, passwordEncoder, itemRepository);
+        userRepository.saveAndFlush(user);
+        assertTrue(userService.checkEmail(user.getEmail()));
+    }
+
+    @Test
+    @DisplayName("Check email when email is not found should return false")
+    void testCheckEmailWhenEmailNotFound() {
+        UserService userService = new UserService(userRepository, entityMapper, pantryRepository, passwordEncoder, itemRepository);
+        assertFalse(userService.checkEmail("xxx@xxx.xxx"));
+    }
+
+    @Test
+    @DisplayName("Update user")
+    void testUpdateUser() {
+        UserService userService = new UserService(userRepository, entityMapper, pantryRepository, passwordEncoder, itemRepository);
+        User newUser = userService.createUser(createUserRequest);
+        log.info("User: " + newUser);
+        User userUpdated = userService.updateUser(newUser.getId(), createUserRequest);
+        assertNotNull(userUpdated);
+        assertEquals(userUpdated.getFirstName(), newUser.getFirstName());
+        assertEquals(userUpdated.getLastName(), newUser.getLastName());
+        assertEquals(userUpdated.getEmail(), newUser.getEmail());
+        assertEquals(userUpdated.getRoles().name(), newUser.getRoles().name());
+        assertEquals(userUpdated.getPantry(), newUser.getPantry());
+
+    }
+
+    @Test
+    @DisplayName("Update user when user is null should return UserNotFoundException")
+    void testUpdateUserWhenUserIsNull() {
+        UserService userService = new UserService(userRepository, entityMapper, pantryRepository, passwordEncoder, itemRepository);
+        assertThrows(UserNotFoundException.class, () -> userService.updateUser(666L, createUserRequest));
+    }
+
+    @Test
+    @DisplayName("Update user profile")
+    void testUpdateUserProfile() {
+        UserService userService = new UserService(userRepository, entityMapper, pantryRepository, passwordEncoder, itemRepository);
+        User newUser = userService.createUser(createUserRequest);
+        CreateUserRequest userRequest = createUserRequest;
+        UpdateUserRequest createUserRequest = new UpdateUserRequest(0, userRequest.firstName(), userRequest.lastName(), userRequest.email(), userRequest.roles(), userRequest.authProvider());
+        log.info("User: " + newUser);
+        User userUpdated = userService.updateUserProfile(newUser.getId(), createUserRequest);
+        assertNotNull(userUpdated);
+        assertEquals(userUpdated.getFirstName(), newUser.getFirstName());
+        assertEquals(userUpdated.getLastName(), newUser.getLastName());
+        assertEquals(userUpdated.getEmail(), newUser.getEmail());
+        assertEquals(userUpdated.getRoles().name(), newUser.getRoles().name());
+        assertEquals(userUpdated.getPantry(), newUser.getPantry());
+
+    }
+
+    @Test
+    @DisplayName("Update user profile when user is null should return null")
+    void testUpdateUserProfileWhenUserIsNull() {
+        UserService userService = new UserService(userRepository, entityMapper, pantryRepository, passwordEncoder, itemRepository);
+        assertNull(userService.updateUserProfile(666L, new UpdateUserRequest(0, "test", "test", "test", "test", "test")));
+    }
 }
+
 

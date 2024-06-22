@@ -32,7 +32,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Roles roles;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
     private Pantry pantry;
 
     public User() {
@@ -195,6 +195,8 @@ public class User implements UserDetails {
                 ", email='" + email + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", firstName='" + firstName + '\'' +
+                ", authProvider='" + authProvider + '\'' +
+                ", pantry=" + pantry +
                 '}';
     }
 }
