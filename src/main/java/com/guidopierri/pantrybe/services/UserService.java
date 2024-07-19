@@ -72,12 +72,12 @@ public class UserService implements UserDetailsService {
             logger.info("Pantry created successfully: {}", savedPantry);
             assert newUser != null;
             newUser.setPantry(savedPantry);
-            logger.info("User created successfully: {}", newUser);
+            logger.info("User created successfully: {}", newUser.getId());
             logger.info("User pantry: {}", newUser.getPantry());
             // Update the User with the associated Pantry
             User savedUser = userRepository.saveAndFlush(newUser);
 
-            logger.info("Saved user: {}", savedUser);
+            logger.info("Saved user with Id: {}", savedUser.getId());
 
             return savedUser;
         }
