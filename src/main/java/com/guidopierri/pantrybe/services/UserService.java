@@ -72,12 +72,12 @@ public class UserService implements UserDetailsService {
             logger.info("Pantry created successfully: {}", savedPantry);
             assert newUser != null;
             newUser.setPantry(savedPantry);
-            logger.info("User created successfully: {}", newUser.getId());
+            logger.info("User created successfully, user id: {}", newUser.getId());
             logger.info("User pantry: {}", newUser.getPantry());
             // Update the User with the associated Pantry
             User savedUser = userRepository.saveAndFlush(newUser);
 
-            logger.info("Saved user with Id: {}", savedUser.getId());
+            logger.info("Saved user with id: {}", savedUser.getId());
 
             return savedUser;
         }
@@ -91,17 +91,10 @@ public class UserService implements UserDetailsService {
             newUser.setFirstName((user.firstName()));
             newUser.setLastName(user.lastName());
             newUser.setEmail(user.email());
-            logger.info("User auth provider: {}", user.authProvider());
             if (user.authProvider().equals("google")) {
-                logger.info("Google user, setting password to null");
                 newUser.setPassword(null);
             } else {
-                logger.info("Not a google user, setting password");
-                logger.info("Password user: {}", user.password());
                 newUser.setPassword(passwordEncoder.encode(user.password()));
-                logger.info("Password newUser: {}", newUser.getPassword());
-
-
             }
             newUser.setUsername(user.email());
             newUser.setImageUrl(user.imageUrl());
@@ -136,7 +129,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public ResponseEntity<DeleteUserResponse> deleteUser(User user) {
         logger.info("Deleting user");
-        logger.info("User found: {}", user);
+        logger.info("User found with id: {}", user.getId());
         if (user.getPantry() != null) {
             deleteItemsByPantryId(user.getPantry().getId());
             deletePantryByUser(user);
