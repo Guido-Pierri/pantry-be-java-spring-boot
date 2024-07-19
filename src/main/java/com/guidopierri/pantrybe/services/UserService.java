@@ -72,12 +72,12 @@ public class UserService implements UserDetailsService {
             logger.info("Pantry created successfully: {}", savedPantry);
             assert newUser != null;
             newUser.setPantry(savedPantry);
-            logger.info("User created successfully: {}", newUser.getId());
+            logger.info("User created successfully, user id: {}", newUser.getId());
             logger.info("User pantry: {}", newUser.getPantry());
             // Update the User with the associated Pantry
             User savedUser = userRepository.saveAndFlush(newUser);
 
-            logger.info("Saved user with Id: {}", savedUser.getId());
+            logger.info("Saved user with id: {}", savedUser.getId());
 
             return savedUser;
         }
@@ -129,7 +129,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public ResponseEntity<DeleteUserResponse> deleteUser(User user) {
         logger.info("Deleting user");
-        logger.info("User found with Id: {}", user.getId());
+        logger.info("User found with id: {}", user.getId());
         if (user.getPantry() != null) {
             deleteItemsByPantryId(user.getPantry().getId());
             deletePantryByUser(user);
