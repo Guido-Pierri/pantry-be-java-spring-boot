@@ -19,9 +19,13 @@ public class DabasItem implements GenericItem {
     private String size;
     @Column(columnDefinition = "VARCHAR(MAX)")
     private String ingredients;
-    private String productClassifications;
-    private String bruteWeight;
-    private String drainedWeight;
+    private String product_classifications;
+    private String brute_weight;
+    private String drained_weight;
+    /**
+     * The level of the item, can be "bas", "mellan" or "topp"
+     */
+    private String level;
 
     public long getId() {
         return id;
@@ -87,28 +91,36 @@ public class DabasItem implements GenericItem {
         this.ingredients = ingredients;
     }
 
-    public String getProductClassifications() {
-        return productClassifications;
+    public String getProduct_classifications() {
+        return product_classifications;
     }
 
-    public void setProductClassifications(String productClassifications) {
-        this.productClassifications = productClassifications;
+    public void setProduct_classifications(String product_classifications) {
+        this.product_classifications = product_classifications;
     }
 
-    public String getBruteWeight() {
-        return bruteWeight;
+    public String getBrute_weight() {
+        return brute_weight;
     }
 
-    public void setBruteWeight(String bruteWeight) {
-        this.bruteWeight = bruteWeight;
+    public void setBrute_weight(String brute_weight) {
+        this.brute_weight = brute_weight;
     }
 
-    public String getDrainedWeight() {
-        return drainedWeight;
+    public String getDrained_weight() {
+        return drained_weight;
     }
 
-    public void setDrainedWeight(String drainedWeight) {
-        this.drainedWeight = drainedWeight;
+    public void setDrained_weight(String drained_weight) {
+        this.drained_weight = drained_weight;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
     }
 
     @Override
@@ -122,9 +134,10 @@ public class DabasItem implements GenericItem {
                 ", category='" + category + '\'' +
                 ", size='" + size + '\'' +
                 ", ingredients='" + ingredients + '\'' +
-                ", productClassifications='" + productClassifications + '\'' +
-                ", bruteWeight='" + bruteWeight + '\'' +
-                ", drainedWeight='" + drainedWeight + '\'' +
+                ", product_classifications='" + product_classifications + '\'' +
+                ", brute_weight='" + brute_weight + '\'' +
+                ", drained_weight='" + drained_weight + '\'' +
+                ", level='" + level + '\'' +
                 '}';
     }
 }

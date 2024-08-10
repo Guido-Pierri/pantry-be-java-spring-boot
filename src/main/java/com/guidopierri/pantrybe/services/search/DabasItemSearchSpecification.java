@@ -14,9 +14,10 @@ import org.springframework.data.jpa.domain.Specification;
 @Getter
 @NoArgsConstructor
 public class DabasItemSearchSpecification implements Specification<DabasItem> {
-    private SearchParams params;
     public static final String NAME = "name";
     public static final String BRAND = "brand";
+    public static final String CATEGORY = "category";
+    private SearchParams params;
 
     public DabasItemSearchSpecification(SearchParams params) {
         this.params = params;
@@ -43,8 +44,8 @@ public class DabasItemSearchSpecification implements Specification<DabasItem> {
         int i = 0;
         for (String part : parts) {
             wordPredicates[i] = criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get(NAME)), "%" + part + "%"),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get(BRAND)), "%" + part + "%")
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get(NAME)), "%" + part + "%")//,
+                    //criteriaBuilder.like(criteriaBuilder.lower(root.get(CATEGORY)), "%" + part + "%")
             );
             i++;
         }

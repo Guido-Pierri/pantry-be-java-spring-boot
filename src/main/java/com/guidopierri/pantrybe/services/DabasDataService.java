@@ -18,6 +18,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -124,7 +125,7 @@ public class DabasDataService implements DataProvider {
             String bruteWeight = jsonNode.path("Nettoinnehall").asText();
             String drainedWeightUnit = jsonNode.path("MangdFardigVaraEnhetKod").asText();
             String drainedWeight = jsonNode.path("MangdFardigVara_Formatted").asText() + " " + drainedWeightUnit;
-
+            String level = jsonNode.path("Niva").asText();
             log.info("productName: {}", productName);
             log.info("gtin: {}", gtin);
             log.info("brand: {}", brand);
@@ -135,6 +136,7 @@ public class DabasDataService implements DataProvider {
             log.info("productClassifications: {}", productClassifications);
             log.info("bruteWeight: {}", bruteWeight);
             log.info("drainedWeight: {}", drainedWeight);
+            log.info("level: {}", level);
 
             return Optional.of(new DabasItemResponse(gtin,
                     productName,
@@ -145,7 +147,7 @@ public class DabasDataService implements DataProvider {
                     ingredients,
                     productClassifications,
                     bruteWeight,
-                    drainedWeight));
+                    drainedWeight, level));
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -191,6 +193,7 @@ public class DabasDataService implements DataProvider {
         List<Search> searchList = new ArrayList<>();
         String encodedSearchParameter = searchParameter.replace(" ", "%20");
         String url = dabasApiUrl + "articles/basesearchparameter/" + encodedSearchParameter + "/JSON?apikey=" + apiKey;
+        log.info("url: {}", url);
         String jsonString;
 
         try {
@@ -260,19 +263,29 @@ public class DabasDataService implements DataProvider {
      */
     public List<DabasItemResponse> search(String searchParameter) {
         List<Search> searchList = getAllBaseArticleSearchResults(searchParameter);
-        log.info("searchList: {}", searchList);
+        log.info("searchList in search(): {}", searchList);
 
         Set<DabasItemResponse> dtos = dtoSet(searchList);
         return dtos.stream().toList();
     }
 
-    private Set<DabasItemResponse> dtoSet(List<Search> searchList) {
+    public List<DabasItemResponse> searchInDatabase(String searchParameter) {
+        SearchParams string = new SearchParams(searchParameter);
+        //List<DabasItemResponse> searchList = searchDatabase(string, PageRequest.of(0, 10));
+        List<DabasItemResponse> searchList = searchDatabaseUnpaginated(string);
+        log.info("searchList in searchInDatabase(): {}", searchList);
+
+        //Set<DabasItemResponse> dtos = dtoSet(searchList);
+        return searchList;
+    }
+
+
+    private Set<DabasItemResponse> dtoSet(@NotNull List<Search> searchList) {
         return searchList.stream()
                 .map(search -> getArticleByGtin(search.getGtin()).orElse(null))
                 .filter(Objects::nonNull)
                 .map(item -> {
-                    log.info("item: {}", item);
-                    return new DabasItemResponse(item.gtin(), item.name(), item.brand(), item.image(), item.category(), item.size(), item.ingredients(), item.productClassifications(), item.bruteWeight(), item.drainedWeight());
+                    return new DabasItemResponse(item.gtin(), item.name(), item.brand(), item.image(), item.category(), item.size(), item.ingredients(), item.productClassifications(), item.bruteWeight(), item.drainedWeight(), item.level());
 
                 })
                 .collect(Collectors.toSet());
@@ -317,7 +330,6 @@ public class DabasDataService implements DataProvider {
      * If the article is not found, an empty Optional is returned.
      */
     private Optional<DabasItemResponse> getArticleByGtin(String gtin) {
-        log.info("gtin: {}", gtin);
         DabasItem dabasItem = dabasItemRepository.findDabasItemByGtin(gtin).orElse(null);
         if (dabasItem == null) {
             return Optional.empty();
@@ -382,7 +394,7 @@ public class DabasDataService implements DataProvider {
         ObjectMapper mapper = new ObjectMapper();
         TypeReference<List<DabasItem>> typeReference = new TypeReference<>() {
         };
-        InputStream inputStream = TypeReference.class.getResourceAsStream("/dabas-items/dabasItems.json");
+        InputStream inputStream = TypeReference.class.getResourceAsStream("/dabas-items/dabas_item.json");
         try {
             List<DabasItem> items = mapper.readValue(inputStream, typeReference);
             saveAll(items);
@@ -416,9 +428,28 @@ public class DabasDataService implements DataProvider {
      * It then uses this specification to fetch a page of IDs from the database, converts this page of IDs into a list of IDs,
      * and fetches a list of DabasItemResponse objects from the database using this list of IDs. It then returns this list of DabasItemResponse objects.
      */
-    public List<DabasItemResponse> search(SearchParams search, Pageable pageable) {
-        Page<Long> page = findIdsBySpecification(new DabasItemSearchSpecification(search), pageable, DabasItem.class);
+    public List<DabasItemResponse> searchDatabase(SearchParams search, Pageable pageable) {
+        Page<Long> page = findIdsBySpecificationPage(new DabasItemSearchSpecification(search), pageable, DabasItem.class);
         return getDabasItemsByIds(page.getContent());
+    }
+
+    /**
+     * Searches for articles in the database using the provided search parameters without pagination.
+     *
+     * @param string The search parameters to use.
+     * @return A list of DabasItemResponse objects representing the search results.
+     * <p>
+     * This method uses the DabasItemSearchSpecification to create a specification based on the provided search parameters.
+     * It then uses this specification to fetch a list of IDs from the database, converts this list of IDs into a list of IDs,
+     * and fetches a list of DabasItemResponse objects from the database using this list of IDs. It then returns this list of DabasItemResponse objects.
+     */
+    private List<DabasItemResponse> searchDatabaseUnpaginated(SearchParams string) {
+        List<DabasItemResponse> dabasItemResponseList = new ArrayList<>();
+        findIdsBySpecificationUpaged(new DabasItemSearchSpecification(string), DabasItem.class).forEach(id -> {
+            dabasItemRepository.findById(id).ifPresent(dabasItem -> dabasItemResponseList.add(entityMapper.dabasItemToDabasItemResponse(dabasItem)));
+        });
+        return dabasItemResponseList;
+
     }
 
     /**
@@ -432,8 +463,8 @@ public class DabasDataService implements DataProvider {
      * This method uses the provided specification to create a CriteriaQuery for fetching a page of IDs from the database.
      * It then executes this query and returns the result as a page of IDs.
      */
-    public <T> Page<Long> findIdsBySpecification(Specification<T> specification,
-                                                 Pageable pageable, Class<T> clazz) {
+    public <T> Page<Long> findIdsBySpecificationPage(Specification<T> specification,
+                                                     Pageable pageable, Class<T> clazz) {
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -454,6 +485,18 @@ public class DabasDataService implements DataProvider {
 
         var totalElements = entityManager.createQuery(countQuery).getSingleResult();
         return new PageImpl<>(result.getResultList(), pageable, totalElements);
+    }
+
+    public <T> List<Long> findIdsBySpecificationUpaged(Specification<T> specification, Class<T> clazz) {
+
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<T> root = query.from(clazz);
+        query.select(root.get("id"))
+                .where(specification.toPredicate(root, query, builder))
+                .orderBy(builder.asc(root.get(DabasItemSearchSpecification.NAME)));
+
+        return entityManager.createQuery(query).getResultList();
     }
 
     /**
