@@ -9,5 +9,6 @@ public record DabasItemResponse(String gtin,
                                 String ingredients,
                                 String productClassifications,
                                 String bruteWeight,
-                                String drainedWeight) {
+                                String drainedWeight,
+                                String level) {
 }

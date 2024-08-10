@@ -86,7 +86,7 @@ public class DabasImportService {
 
             for (Map<String, String> article : batch) {
                 Optional<DabasItemResponse> response = dabasDataService.getArticle(article.get("GTIN"));
-                if (response.isPresent()) {
+                if (response.isPresent() && response.get().level().equals("Bas")) {
                     dabasItemRepository.saveAndFlush(entityMapper.dabasItemResponseToDabasItem(response.get()));
                     articles.add(response.get());
                     log.info("Imported article: {}", response.get().name());

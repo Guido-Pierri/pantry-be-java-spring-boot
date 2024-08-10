@@ -41,7 +41,7 @@ public class DabasController {
     @GetMapping("/parameter/{searchParameter}")
     public ResponseEntity<List<DabasItemResponse>> getAllProductsBySearchParameter(@PathVariable String searchParameter) {
 
-        return new ResponseEntity<>(dabasDataService.search(searchParameter), HttpStatus.OK);
+        return new ResponseEntity<>(dabasDataService.searchInDatabase(searchParameter), HttpStatus.OK);
     }
 
     @Operation(summary = "Get all products paginated by search parameter.")
