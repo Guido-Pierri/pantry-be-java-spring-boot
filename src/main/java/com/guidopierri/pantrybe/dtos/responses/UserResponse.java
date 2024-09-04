@@ -7,6 +7,7 @@ public record UserResponse(long id,
                            String imageUrl,
                            String password,
                            String roles,
-                           String token) {
+                           String token,
+                           boolean isFirstTimeUser) {
 
 }

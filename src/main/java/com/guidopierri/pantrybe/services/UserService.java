@@ -13,8 +13,6 @@ import com.guidopierri.pantrybe.repositories.PantryRepository;
 import com.guidopierri.pantrybe.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,17 +43,14 @@ public class UserService implements UserDetailsService {
         this.itemRepository = itemRepository;
     }
 
-    @Cacheable(value = "users")
     public List<User> getUsers() {
         return userRepository.findAll();
     }
 
-    @Cacheable(value = "users", key = "#id")
     public User getUserById(long id) {
         return (userRepository.findById(id).orElse(null));
     }
 
-    @CacheEvict(value = "users", allEntries = true)
     @Transactional
     public User createUser(CreateUserRequest user) {
         logger.info("Creating user");
@@ -85,7 +80,7 @@ public class UserService implements UserDetailsService {
     }
 
     private User saveUser(CreateUserRequest user) {
-
+        logger.info("Saving user:");
         if (user.id() == 0) {
             User newUser = new User();
             newUser.setFirstName((user.firstName()));
@@ -111,19 +106,29 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
-    @Cacheable(value = "users", key = "#email")
     public User getUserByEmail(String email) {
-        return userRepository.findUserByEmail(email).orElse(null);
+        User user = fetchUserByEmail(email);
+        return user;
+    }
+
+    public User fetchUserByEmail(String email) {
+        return userRepository.findUserByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
     }
 
     @Override
-    @Cacheable(value = "users", key = "#username")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
     public User findUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        return fetchUserById(userId);
+    }
+
+    private User fetchUserById(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        return user;
     }
 
     @Transactional
@@ -150,7 +155,6 @@ public class UserService implements UserDetailsService {
         itemRepository.deleteByPantryId(pantryId);
     }
 
-    @CacheEvict(value = "users", allEntries = true)
     public ResponseEntity<DeleteUserResponse> deleteUserById(Long userId) {
         User user = findUserById(userId);
         return deleteUser(user);
@@ -160,7 +164,6 @@ public class UserService implements UserDetailsService {
         return userRepository.findUserByEmail(email).isPresent();
     }
 
-    @CacheEvict(value = "users", key = "#id")
     @Transactional
     public User updateUser(Long id, CreateUserRequest user) {
         logger.info("Updating user with id: {}", id);
@@ -173,13 +176,13 @@ public class UserService implements UserDetailsService {
         userToUpdate.setLastName(user.lastName());
         userToUpdate.setEmail(user.email());
         userToUpdate.setRoles(Roles.valueOf(user.roles()));
+        userToUpdate.setFirstTimeUser(user.isFirstTimeUser());
         userRepository.saveAndFlush(userToUpdate);
         logger.info("User with id {} updated successfully", id);
         return (userToUpdate);
 
     }
 
-    @CacheEvict(value = "users", allEntries = true)
     @Transactional
     public User updateUserProfile(Long id, UpdateUserRequest user) {
         User userToUpdate = userRepository.findById(id).orElse(null);

@@ -45,6 +45,10 @@ public class DabasImportService {
         this.entityMapper = entityMapper;
     }
 
+    /**
+     * TODO: Import only articles with level "Bas" from DABAS API
+     * remove the articles that are not level "Bas" from articlesMap
+     */
     private static ObjectMapper getObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());

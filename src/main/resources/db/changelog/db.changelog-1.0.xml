@@ -11,4 +11,5 @@
     <include file="1.0/add-item.xml" relativeToChangelogFile="true"/>
     <include file="1.0/add-dabas-item.xml" relativeToChangelogFile="true"/>
     <include file="1.0/add-level-dabas-item.xml" relativeToChangelogFile="true"/>
+    <include file="1.0/add-is-first-sign-time-user.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
