@@ -11,6 +11,7 @@ public record CreateUserRequest(@NotNull long id,
                                 @URL /*@NotNull*/ String imageUrl,
                                 @NotNull String password,
                                 @NotNull String roles,
-                                @NotNull String authProvider) {
+                                @NotNull String authProvider,
+                                boolean isFirstTimeUser) {
 
 }

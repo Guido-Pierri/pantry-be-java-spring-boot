@@ -15,7 +15,6 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Size(min = 4, max = 64)
-
     private String username;
     private String email;
     private String imageUrl;
@@ -23,6 +22,7 @@ public class User implements UserDetails {
     private String password;
     private String firstName;
     private String lastName;
+    private boolean isFirstTimeUser = true;
     private boolean isAccountNonExpired;
     private boolean isAccountNonLocked;
     private boolean isCredentialsNonExpired;
@@ -43,6 +43,7 @@ public class User implements UserDetails {
                 String password,
                 String firstName,
                 String lastName,
+                boolean isFirstLogin,
                 boolean isAccountNonExpired,
                 boolean isAccountNonLocked,
                 boolean isCredentialsNonExpired,
@@ -55,6 +56,7 @@ public class User implements UserDetails {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.isFirstTimeUser = isFirstLogin;
         this.isAccountNonExpired = isAccountNonExpired;
         this.isAccountNonLocked = isAccountNonLocked;
         this.isCredentialsNonExpired = isCredentialsNonExpired;
@@ -187,6 +189,14 @@ public class User implements UserDetails {
         this.imageUrl = imageUrl;
     }
 
+    public boolean isFirstTimeUser() {
+        return isFirstTimeUser;
+    }
+
+    public void setFirstTimeUser(boolean firstTimeUser) {
+        isFirstTimeUser = firstTimeUser;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -197,6 +207,8 @@ public class User implements UserDetails {
                 ", firstName='" + firstName + '\'' +
                 ", authProvider='" + authProvider + '\'' +
                 ", pantry=" + pantry +
+                ", roles=" + roles +
+                ", isFirstTimeUser=" + isFirstTimeUser +
                 '}';
     }
 }

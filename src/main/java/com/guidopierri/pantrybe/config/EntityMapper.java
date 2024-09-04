@@ -4,6 +4,7 @@ import com.guidopierri.pantrybe.dtos.ItemDto;
 import com.guidopierri.pantrybe.dtos.PantryDto;
 import com.guidopierri.pantrybe.dtos.UserDto;
 import com.guidopierri.pantrybe.dtos.requests.CreateItemRequest;
+import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.dtos.responses.DabasItemResponse;
 import com.guidopierri.pantrybe.dtos.responses.UserResponse;
 import com.guidopierri.pantrybe.models.DabasItem;
@@ -70,4 +71,5 @@ public interface EntityMapper {
 
     }
 
+    CreateUserRequest userToCreateUserRequest(User user);
 }

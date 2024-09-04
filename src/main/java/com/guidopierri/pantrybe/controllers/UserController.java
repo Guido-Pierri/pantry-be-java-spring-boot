@@ -66,7 +66,16 @@ public class UserController {
         final String jwt = jwtUtil.generateToken(user);
 
         logger.info("Login successful");
-        return new ResponseEntity<>(new UserResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getImageUrl(), user.getPassword(), user.getRoles().name(), jwt),
+        return new ResponseEntity<>(new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getImageUrl(),
+                user.getPassword(),
+                user.getRoles().name(),
+                jwt,
+                user.isFirstTimeUser()),
                 HttpStatus.OK);
     }
 
@@ -96,7 +105,16 @@ public class UserController {
         User user = userService.getUserByEmail(email);
         final String jwt = jwtUtil.generateToken(user);
 
-        UserResponse userResponse = new UserResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getImageUrl(), user.getPassword(), user.getRoles().name(), jwt);
+        UserResponse userResponse = new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getImageUrl(),
+                user.getPassword(),
+                user.getRoles().name(),
+                jwt,
+                user.isFirstTimeUser());
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
@@ -158,4 +176,18 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Operation(summary = "Update isFirstimeUser")
+    @PutMapping("/update-first-time-user/{id}")
+    public ResponseEntity<?> updateFirstTimeUser(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if (!user.isFirstTimeUser()) {
+            return null;
+        }
+        user.setFirstTimeUser(false);
+        userService.updateUser(id, entityMapper.userToCreateUserRequest(user));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
