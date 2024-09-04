@@ -48,7 +48,7 @@ class PantryServiceIT {
                 "test",
                 "test",
                 Roles.USER.name(),
-                "test");
+                "test", false);
         User user = userService.createUser(createUserRequest);
         //pantryService.createPantry(new CreatePantryRequest(0, user.getId()));
         // Act
@@ -67,6 +67,7 @@ class PantryServiceIT {
         assertEquals(pantry.getUser().getImageUrl(), user.getImageUrl());
         assertEquals(pantry.getUser().getAuthProvider(), user.getAuthProvider());
         assertEquals(pantry.getUser().getRoles(), user.getRoles());
+        assertEquals(pantry.getUser().isFirstTimeUser(), user.isFirstTimeUser());
 
     }
 
@@ -82,7 +83,7 @@ class PantryServiceIT {
                 "test",
                 "test",
                 Roles.USER.name(),
-                "test");
+                "test", false);
         User user = userService.createUser(createUserRequest);
         pantryRepository.deleteAll();
         // Act
