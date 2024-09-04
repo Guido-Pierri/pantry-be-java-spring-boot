@@ -34,8 +34,8 @@ public class UserServiceIT {
     @Autowired
     ItemRepository itemRepository;
     User user = new User();
-    UserDto userDto = new UserDto(0, "test", "test", "testuser@gmail.com", "test", Roles.USER.name());
-    CreateUserRequest createUserRequest = new CreateUserRequest(0, "test", "test", "testuser@gmail.com", "test", "test", Roles.USER.name(), "google");
+    UserDto userDto = new UserDto(0, "test", "test", "testuser@gmail.com", "test", Roles.USER.name(), true);
+    CreateUserRequest createUserRequest = new CreateUserRequest(0, "test", "test", "testuser@gmail.com", "test", "test", Roles.USER.name(), "google", true);
     @MockBean
     private EntityMapper entityMapper;
     @Autowired
@@ -61,6 +61,7 @@ public class UserServiceIT {
         user.setImageUrl("imageUrl");
         user.setAuthProvider("google");
         user.setRoles(Roles.USER);
+        user.setFirstTimeUser(true);
 
     }
 
@@ -118,7 +119,7 @@ public class UserServiceIT {
     @DisplayName("Create user when user auth provider is credentials should store hashed password")
     void testCreateUserWhenUserAuthProviderIsCredentials() {
         UserService userService = new UserService(userRepository, entityMapper, pantryRepository, passwordEncoder, itemRepository);
-        CreateUserRequest createUserRequestWithCredentials = new CreateUserRequest(0, "test", "test", "testuser@gmail.com", "test", "test", Roles.USER.name(), "credentials");
+        CreateUserRequest createUserRequestWithCredentials = new CreateUserRequest(0, "test", "test", "testuser@gmail.com", "test", "test", Roles.USER.name(), "credentials", true);
         User user = userService.createUser(createUserRequestWithCredentials);
         log.info("User: " + user);
         assertNotNull(user);
@@ -141,10 +142,10 @@ public class UserServiceIT {
     }
 
     @Test
-    @DisplayName("Get user by email when email is not found should return null")
+    @DisplayName("Get user by email when email is not found should return UserNotFoundException")
     void testGetUserByEmailWhenEmailNotFound() {
         UserService userService = new UserService(userRepository, entityMapper, pantryRepository, passwordEncoder, itemRepository);
-        assertNull(userService.getUserByEmail("xxx@xxx.xxx"));
+        assertThrows(UserNotFoundException.class, () -> userService.getUserByEmail("xxx@xxx.xxx"));
 
     }
 
