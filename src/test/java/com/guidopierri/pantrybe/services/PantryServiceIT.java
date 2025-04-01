@@ -1,5 +1,6 @@
 package com.guidopierri.pantrybe.services;
 
+import com.guidopierri.pantrybe.PantryBeApplication;
 import com.guidopierri.pantrybe.dtos.requests.CreateUserRequest;
 import com.guidopierri.pantrybe.models.Pantry;
 import com.guidopierri.pantrybe.models.User;
@@ -18,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
-@SpringBootTest
+@SpringBootTest(classes = {PantryBeApplication.class, KeepAliveScheduler.class})
 class PantryServiceIT {
     private static final Logger log = LoggerFactory.getLogger(PantryServiceIT.class);
     @Autowired
