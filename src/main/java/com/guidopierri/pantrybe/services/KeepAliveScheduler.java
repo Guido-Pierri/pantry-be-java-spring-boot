@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 public class KeepAliveScheduler {
 
     private final RestTemplate restTemplate;
-    private final String URL = "https://pantrybe.azurewebsites.net/api/v1/health/live";
+    private final String URL = "https://pantry-be-service.azurewebsites.net/api/v1/health/live";
 
     public KeepAliveScheduler(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
