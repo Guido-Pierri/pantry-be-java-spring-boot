@@ -108,7 +108,7 @@ public class DabasImportService {
      * @throws Exception If there is an error during the API request or the JSON processing.
      * @Scheduled(cron = "0 2 * * 0") Annotation indicating that the method should be run on a schedule.
      */
-    @Scheduled(cron = "0 2 * * 0") // run every week at 2:00 AM
+    @Scheduled(cron = "0 0 2 * * 0") // run every week on Sunday at 2:00 AM
     public void cronImportArticles() throws Exception {
         importArticlesGtin();
     }
