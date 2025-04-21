@@ -46,7 +46,8 @@ public class SecurityConfig {
                                 "/api/v1/users/login/**",
                                 "/api/v1/users/check-email",
                                 "/swagger-ui/**",
-                                "/v3/**")
+                                "/v3/**",
+                                "/api/v1/health/live")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
@@ -59,8 +60,11 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("POST", "PUT", "DELETE"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000",
+                "http://localhost:8080",
+                "https://pantry-be-service.azurewebsites.net",
+                "https://pantry-be-service.azurewebsites.net/"));
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
