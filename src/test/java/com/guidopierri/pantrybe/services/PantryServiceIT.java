@@ -19,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = {PantryBeApplication.class, KeepAliveScheduler.class})
+@SpringBootTest(classes = {PantryBeApplication.class})
 class PantryServiceIT {
     private static final Logger log = LoggerFactory.getLogger(PantryServiceIT.class);
     @Autowired
