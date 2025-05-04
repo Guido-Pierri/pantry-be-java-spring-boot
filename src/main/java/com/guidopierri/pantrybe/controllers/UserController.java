@@ -173,6 +173,7 @@ public class UserController {
     @Operation(summary = "Check if token is valid")
     @GetMapping("/check-token")
     public ResponseEntity<String> checkToken() {
+        logger.debug("Checking token");
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
