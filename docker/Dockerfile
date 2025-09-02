@@ -1,4 +1,4 @@
-FROM acrtrafikweu.azurecr.io/docker.io/library/eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 VOLUME /app
 COPY app.jar /app/
 RUN adduser -D user
