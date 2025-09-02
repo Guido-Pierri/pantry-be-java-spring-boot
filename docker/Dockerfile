@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jre-alpine
 VOLUME /app
-COPY app.jar /app/
+COPY target/Pantry-BE-0.0.1-SNAPSHOT.jar /app/app.jar
 RUN adduser -D user
 USER user
 ENTRYPOINT ["java"]
