@@ -6,14 +6,30 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet id="2" author="gp">
-        <createTable tableName="pantry">
-            <column name="id" type="bigint" autoIncrement="true">
+        <createTable tableName="pantries">
+            <column name="id" type="SERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="application_user" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_pantry_application_user"
-                             referencedTableName="application_user" referencedColumnNames="id"/>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="text">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="false"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="pantries"
+                                baseColumnNames="user_id"
+                                referencedTableName="application_user"
+                                referencedColumnNames="id"
+                                constraintName="fk_pantries_users"/>
     </changeSet>
 </databaseChangeLog>

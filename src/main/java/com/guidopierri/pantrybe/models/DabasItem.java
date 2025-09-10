@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "dabas_items")
 public class DabasItem implements GenericItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,10 +4,28 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
     <changeSet id="5" author="gp">
-        <addColumn tableName="dabas_item">
-            <column name="level" type="varchar(255)">
-                <constraints nullable="true"/>
+        <createTable tableName="level_dabas_item">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
-        </addColumn>
+            <column name="level" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dabas_item_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="level_dabas_item"
+                                 baseColumnNames="dabas_item_id"
+                                 referencedTableName="dabas_items"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_level_dabas_items_dabas_items"/>
+
     </changeSet>
 </databaseChangeLog>

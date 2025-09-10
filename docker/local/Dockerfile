@@ -1,17 +1,17 @@
-FROM mcr.microsoft.com/azure-sql-edge:latest
+FROM postgres:15
 
-EXPOSE 1433
-ENV SA_PASSWORD "MyP@w0rd"
-ENV SQLCMDPASSWORD "MyP@w0rd"
-ENV ACCEPT_EULA "Y"
+EXPOSE 5432
 
-RUN (mkdir -p /opt/mssql-tools/bin && cd /opt/mssql-tools/bin && wget https://github.com/microsoft/go-sqlcmd/releases/download/v0.8.0/sqlcmd-v0.8.0-linux-arm64.tar.bz2 \
-    && bzip2 -d sqlcmd-v0.8.0-linux-arm64.tar.bz2 && tar -xvf sqlcmd-v0.8.0-linux-arm64.tar && chmod 755 sqlcmd)
+ENV POSTGRES_PASSWORD=MyP@w0rd
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_DB=localdb
+ENV POSTGRES_HOST_AUTH_METHOD=trust
 
-RUN  /opt/mssql/bin/sqlservr & sleep 20 && \
-     /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -d master \
-     -Q "create database localdb;" && \
-     /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -d master -i  /database/schema.sql
+# Use a path relative to the build context
+#COPY ../../database/schema.sql /docker-entrypoint-initdb.d/
 
+# PostgreSQL automatically runs scripts in docker-entrypoint-initdb.d/
+# and creates the database specified in POSTGRES_DB on startup
 
-CMD /opt/mssql/bin/sqlservr
+# Default command - starts PostgreSQL
+CMD ["postgres"]
