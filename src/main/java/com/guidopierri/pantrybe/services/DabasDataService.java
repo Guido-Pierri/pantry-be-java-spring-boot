@@ -68,15 +68,18 @@ public class DabasDataService implements DataProvider {
     private String apiKey;
     @Value("${dabas-api-url}")
     private String dabasApiUrl;
-    @Autowired
-    private Environment env;
 
-    public DabasDataService(ItemService itemService, DabasItemRepository dabasItemRepository, EntityMapper entityMapper, EntityManager entityManager) {
-        this.itemService = itemService;
-        this.dabasItemRepository = dabasItemRepository;
-        this.entityMapper = entityMapper;
-        this.entityManager = entityManager;
-    }
+  private final Environment env;
+private final String[] activeProfiles;
+
+public DabasDataService(ItemService itemService, DabasItemRepository dabasItemRepository, EntityMapper entityMapper, EntityManager entityManager, Environment env) {
+    this.itemService = itemService;
+    this.dabasItemRepository = dabasItemRepository;
+    this.entityMapper = entityMapper;
+    this.entityManager = entityManager;
+    this.env = env;
+    this.activeProfiles = env.getActiveProfiles();
+}
 
     private static ObjectMapper getObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -389,28 +392,30 @@ public class DabasDataService implements DataProvider {
      * This method reads a JSON file containing a list of DabasItem objects, converts the JSON into a list of DabasItem objects,
      * and then saves this list to the database using the saveAll method. If an error occurs during this process, it logs the error message.
      */
-    public void seedArticles() {
+   public void seedArticles() {
         log.info("Seeding articles");
         ObjectMapper mapper = new ObjectMapper();
-        TypeReference<List<DabasItem>> typeReference = new TypeReference<>() {
-        };
-        InputStream inputStream = TypeReference.class.getResourceAsStream("/dabas-items/dabas_item.json");
-        try {
+        TypeReference<List<DabasItem>> typeReference = new TypeReference<>() {};
+
+        try (InputStream inputStream = TypeReference.class.getResourceAsStream("/dabas-items/dabas_item.json")) {
             List<DabasItem> items = mapper.readValue(inputStream, typeReference);
             List<DabasItem> validItems = new ArrayList<>();
             Set<String> gtinSet = new HashSet<>();
-            for (DabasItem item : items) {
-                if (item.getGtin() == null || item.getGtin().isBlank() || gtinSet.contains(item.getGtin())) continue;
-                gtinSet.add(item.getGtin());
-                validItems.add(item);
-            }
+
+                for (DabasItem item : items) {
+                    if (item.getGtin().isBlank() || gtinSet.contains(item.getGtin())) continue;
+                    if (Arrays.asList(env.getActiveProfiles()).contains("dev") && validItems.size() >= 1000) break;
+                    gtinSet.add(item.getGtin());
+                    validItems.add(item);
+                }
+
+
             saveAll(validItems);
-            log.info("{} Items seeded!", items.size());
+            log.info("{} Items seeded!", validItems.size());
         } catch (IOException e) {
             log.info("Unable to seed articles: {}", e.getMessage());
         }
     }
-
     /**
      * Fetches a list of DabasItemResponse objects from the database using the provided list of IDs.
      *
@@ -528,7 +533,6 @@ public class DabasDataService implements DataProvider {
     @PostConstruct
     @Profile("!test")
     public void init() {
-        String[] activeProfiles = env.getActiveProfiles();
         boolean isTestProfileActive = Arrays.asList(activeProfiles).contains("test");
         if (!isTestProfileActive) {
             checkAndSeedArticles();
