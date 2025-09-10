@@ -4,32 +4,39 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
     <changeSet id="3" author="gp">
-        <createTable tableName="item">
-            <column name="id" type="bigint" autoIncrement="true">
+        <createTable tableName="items">
+            <column name="id" type="SERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="quantity" type="bigint">
+            <column name="quantity" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="expiration_date" type="varchar(255)">
+            <column name="expiration_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="category" type="varchar(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="notes" type="text">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="brand" type="varchar(255)">
+            <column name="updated_at" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="image" type="varchar(255)">
+            <column name="pantry_id" type="int">
                 <constraints nullable="false"/>
-            </column>
-            <column name="category" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="pantry" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_item_pantry" referencedTableName="pantry"
-                             referencedColumnNames="id"/>
             </column>
         </createTable>
+        <addForeignKeyConstraint baseTableName="items"
+                                baseColumnNames="pantry_id"
+                                referencedTableName="pantries"
+                                referencedColumnNames="id"
+                                constraintName="fk_items_pantries"/>
     </changeSet>
 </databaseChangeLog>

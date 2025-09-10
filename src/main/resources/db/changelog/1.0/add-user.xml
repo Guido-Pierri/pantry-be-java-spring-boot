@@ -5,43 +5,25 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
     <changeSet id="1" author="gp">
         <createTable tableName="application_user">
-            <column name="id" type="bigint" autoIncrement="true">
+            <column name="id" type="SERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
             <column name="email" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="first_name" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="last_name" type="varchar(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="password" type="varchar(255)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="roles" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="auth_provider" type="varchar(255)">
-                <constraints nullable="true"/>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
             </column>
-            <column name="image_url" type="varchar(255)">
-                <constraints nullable="true"/>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
             </column>
-            <column name="is_account_non_expired" type="boolean">
-                <constraints nullable="true"/>
-            </column>
-            <column name="is_account_non_locked" type="boolean">
-                <constraints nullable="true"/>
-            </column>
-            <column name="is_credentials_non_expired" type="boolean">
-                <constraints nullable="true"/>
-            </column>
-            <column name="is_enabled" type="boolean">
-                <constraints nullable="true"/>
-            </column>
-            <column name="username" type="varchar(64)">
+            <column name="is_first_sign_time" type="boolean">
                 <constraints nullable="false"/>
             </column>
 

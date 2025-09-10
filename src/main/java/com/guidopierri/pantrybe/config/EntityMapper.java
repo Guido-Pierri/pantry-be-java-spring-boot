@@ -15,6 +15,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -29,7 +30,7 @@ public interface EntityMapper {
         long id = 0L;
         String name = null;
         long quantity = 0L;
-        String expirationDate = null;
+        LocalDate expirationDate = null;
         String gtin = null;
         String brand = null;
         String image = null;
@@ -45,8 +46,8 @@ public interface EntityMapper {
 
         long pantryId = 0L;
         pantryId = item.getPantry().getId();
-
-        return new ItemDto(id, name, quantity, expirationDate, brand, image, category, pantryId);
+        //TODO: will expirationDate.toString() work?
+        return new ItemDto(id, name, quantity, expirationDate.toString(), brand, image, category, pantryId);
 
     }
 

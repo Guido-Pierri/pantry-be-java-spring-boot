@@ -76,7 +76,7 @@ public class PantryService {
                     return new ItemDto(item.getId(),
                             item.getName(),
                             item.getQuantity(),
-                            item.getExpirationDate(),
+                            item.getExpirationDate().toString(),
                             item.getBrand(),
                             item.getImage(),
                             item.getCategory(),

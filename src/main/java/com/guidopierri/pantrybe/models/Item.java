@@ -3,6 +3,9 @@ package com.guidopierri.pantrybe.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+
 @Entity
 @Table(name = "item")
 public class Item implements GenericItem {
@@ -11,7 +14,7 @@ public class Item implements GenericItem {
     private long id;
     private String name;
     private long quantity;
-    private String expirationDate;
+    private LocalDate expirationDate;
     private String brand;
     private String image;
     private String category;
@@ -22,7 +25,7 @@ public class Item implements GenericItem {
     public Item() {
     }
 
-    public Item(String name, long quantity, String expirationDate, String brand, String image, String category, Pantry pantry) {
+    public Item(String name, long quantity, LocalDate expirationDate, String brand, String image, String category, Pantry pantry) {
         this.name = name;
         this.quantity = quantity;
         this.expirationDate = expirationDate;
@@ -48,7 +51,7 @@ public class Item implements GenericItem {
         return this.quantity;
     }
 
-    public String getExpirationDate() {
+    public LocalDate getExpirationDate() {
         return this.expirationDate;
     }
 
@@ -77,7 +80,7 @@ public class Item implements GenericItem {
         this.quantity = quantity;
     }
 
-    public void setExpirationDate(String expirationDate) {
+    public void setExpirationDate(LocalDate expirationDate) {
         this.expirationDate = expirationDate;
     }
 

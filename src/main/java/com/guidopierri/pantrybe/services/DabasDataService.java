@@ -397,7 +397,14 @@ public class DabasDataService implements DataProvider {
         InputStream inputStream = TypeReference.class.getResourceAsStream("/dabas-items/dabas_item.json");
         try {
             List<DabasItem> items = mapper.readValue(inputStream, typeReference);
-            saveAll(items);
+            List<DabasItem> validItems = new ArrayList<>();
+            Set<String> gtinSet = new HashSet<>();
+            for (DabasItem item : items) {
+                if (item.getGtin() == null || item.getGtin().isBlank() || gtinSet.contains(item.getGtin())) continue;
+                gtinSet.add(item.getGtin());
+                validItems.add(item);
+            }
+            saveAll(validItems);
             log.info("{} Items seeded!", items.size());
         } catch (IOException e) {
             log.info("Unable to seed articles: {}", e.getMessage());

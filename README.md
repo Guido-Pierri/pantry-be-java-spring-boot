@@ -10,14 +10,14 @@ mvn dependency:resolve
 Create a local database:
 ```shell
 cd docker/local
-docker build . --tag pantry-local-db
+docker build . --tag pantry-local-db-postgres
 ```
 ## Run the application
 
 Start the db:
 ```shell
 cd docker/local
-docker run -p 1433:1433 pantry-local-db
+docker run -p 5432:5432 pantry-local-db-postgres
 ```
 
 
