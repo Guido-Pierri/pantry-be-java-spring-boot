@@ -533,7 +533,7 @@ public DabasDataService(ItemService itemService, DabasItemRepository dabasItemRe
     @PostConstruct
     @Profile("!test")
     public void init() {
-        boolean isTestProfileActive = Arrays.asList(activeProfiles).contains("test");
+        boolean isTestProfileActive = Arrays.asList(activeProfiles).contains("test") || Arrays.asList(activeProfiles).contains("dev");
         if (!isTestProfileActive) {
             checkAndSeedArticles();
         }
